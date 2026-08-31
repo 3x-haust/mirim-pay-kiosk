@@ -39,6 +39,7 @@ Add-Type -AssemblyName UIAutomationTypes
 Add-Type -AssemblyName System.Drawing
 Add-Type -ReferencedAssemblies @("UIAutomationClient", "UIAutomationTypes", "WindowsBase", "System.Drawing") -TypeDefinition @'
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -60,9 +61,11 @@ public sealed class KioskUiContext
 
 public sealed class KioskWindowWaiter : IDisposable
 {
-    private readonly ManualResetEventSlim opened = new ManualResetEventSlim(false);
+    private readonly ConcurrentDictionary<int, ConcurrentQueue<AutomationElement>> candidates =
+        new ConcurrentDictionary<int, ConcurrentQueue<AutomationElement>>();
+    private readonly ConcurrentDictionary<int, ManualResetEventSlim> signals =
+        new ConcurrentDictionary<int, ManualResetEventSlim>();
     private readonly AutomationEventHandler handler;
-    private AutomationElement openedWindow;
 
     public KioskWindowWaiter()
     {
@@ -71,10 +74,12 @@ public sealed class KioskWindowWaiter : IDisposable
             AutomationElement candidate = sender as AutomationElement;
             try
             {
-                if (candidate != null && candidate.Current.Name == "MIRIM PAY")
+                if (candidate != null)
                 {
-                    openedWindow = candidate;
-                    opened.Set();
+                    int processId = candidate.Current.ProcessId;
+                    candidates.GetOrAdd(processId, ignored => new ConcurrentQueue<AutomationElement>()).Enqueue(candidate);
+                    ManualResetEventSlim signal;
+                    if (signals.TryGetValue(processId, out signal)) signal.Set();
                 }
             }
             catch (ElementNotAvailableException) { }
@@ -86,18 +91,37 @@ public sealed class KioskWindowWaiter : IDisposable
 
     public AutomationElement WaitForWindow(Process process)
     {
-        if (!opened.Wait(KioskUiQa.UiTimeoutMilliseconds))
-            throw new TimeoutException("The MIRIM PAY window did not open before the bounded timeout.");
-        if (openedWindow == null || openedWindow.Current.ProcessId != process.Id)
+        ConcurrentQueue<AutomationElement> queue;
+        if (!candidates.TryGetValue(process.Id, out queue))
+        {
+            queue = candidates.GetOrAdd(process.Id, ignored => new ConcurrentQueue<AutomationElement>());
+        }
+        AutomationElement window;
+        if (!queue.TryDequeue(out window))
+        {
+            using (ManualResetEventSlim signal = new ManualResetEventSlim(false))
+            {
+                signals[process.Id] = signal;
+                if (!queue.TryDequeue(out window) &&
+                    (!signal.Wait(KioskUiQa.UiTimeoutMilliseconds) || !queue.TryDequeue(out window)))
+                    throw new TimeoutException("The launched process window did not open before the bounded timeout.");
+                ManualResetEventSlim removedSignal;
+                signals.TryRemove(process.Id, out removedSignal);
+            }
+        }
+        if (window.Current.ProcessId != process.Id)
             throw new InvalidOperationException("WindowOpenedEvent did not identify the launched process.");
-        return openedWindow;
+        candidates.TryRemove(process.Id, out queue);
+        return window;
     }
 
     public void Dispose()
     {
         Automation.RemoveAutomationEventHandler(
             WindowPattern.WindowOpenedEvent, AutomationElement.RootElement, handler);
-        opened.Dispose();
+        foreach (ManualResetEventSlim signal in signals.Values) signal.Dispose();
+        signals.Clear();
+        candidates.Clear();
     }
 }
 

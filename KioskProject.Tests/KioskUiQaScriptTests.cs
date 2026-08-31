@@ -65,6 +65,22 @@ public sealed class KioskUiQaScriptTests
     }
 
     [Fact]
+    public void Window_waiter_correlates_pre_and_post_launch_events_by_process_id()
+    {
+        var waiter = ExtractType("KioskWindowWaiter");
+
+        Assert.Contains("ConcurrentDictionary<int, ConcurrentQueue<AutomationElement>>", waiter, StringComparison.Ordinal);
+        Assert.Contains("candidate.Current.ProcessId", waiter, StringComparison.Ordinal);
+        Assert.Contains("process.Id", waiter, StringComparison.Ordinal);
+        Assert.Contains("TryRemove", waiter, StringComparison.Ordinal);
+        Assert.DoesNotContain("Current.Name == \"MIRIM PAY\"", waiter, StringComparison.Ordinal);
+        Assert.Contains("out removedSignal", waiter, StringComparison.Ordinal);
+        Assert.DoesNotContain("TryRemove(process.Id, out signal)", waiter, StringComparison.Ordinal);
+        AssertInTextOrder(ExtractPowerShellFunction("Start-KioskProcess"),
+            "[KioskWindowWaiter]::new()", "Start-Process", "WaitForWindow($process)");
+    }
+
+    [Fact]
     public void Script_has_no_sleep_polling_or_coordinate_only_input()
     {
         var forbiddenCommands = Ast.FindAll(node => node is CommandAst, searchNestedScriptBlocks: true)
@@ -175,6 +191,15 @@ public sealed class KioskUiQaScriptTests
         var ast = Parser.ParseFile(ScriptPath, out _, out var errors);
         Assert.Empty(errors);
         return ast;
+    }
+
+    private static string ExtractType(string typeName)
+    {
+        var match = Regex.Match(Source,
+            $@"public sealed class {typeName}\b[\s\S]*?(?=public static class)",
+            RegexOptions.CultureInvariant);
+        Assert.True(match.Success, $"Missing helper type {typeName}.");
+        return match.Value;
     }
 
     private static string ExtractTypeMethod(string methodName)
