@@ -1,0 +1,50 @@
+<Window x:Class="KioskProject.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:KioskProject.Views"
+        xmlns:viewModels="clr-namespace:KioskProject.ViewModels"
+        Title="MIRIM PAY"
+        Width="1080"
+        Height="1920"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        WindowState="Maximized"
+        ShowInTaskbar="False"
+        Topmost="True"
+        Background="{StaticResource KioskBlackBrush}">
+    <Window.Resources>
+        <DataTemplate x:Key="MenuViewTemplate">
+            <views:MenuView />
+        </DataTemplate>
+        <DataTemplate x:Key="CartViewTemplate">
+            <views:CartView />
+        </DataTemplate>
+        <DataTemplate x:Key="PaymentViewTemplate">
+            <views:PaymentView />
+        </DataTemplate>
+    </Window.Resources>
+
+    <ContentControl Content="{Binding}"
+                    HorizontalContentAlignment="Stretch"
+                    VerticalContentAlignment="Stretch">
+        <ContentControl.Style>
+            <Style TargetType="ContentControl">
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding CurrentView}"
+                                 Value="{x:Static viewModels:KioskView.Menu}">
+                        <Setter Property="ContentTemplate" Value="{StaticResource MenuViewTemplate}" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding CurrentView}"
+                                 Value="{x:Static viewModels:KioskView.Cart}">
+                        <Setter Property="ContentTemplate" Value="{StaticResource CartViewTemplate}" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding CurrentView}"
+                                 Value="{x:Static viewModels:KioskView.Payment}">
+                        <Setter Property="ContentTemplate" Value="{StaticResource PaymentViewTemplate}" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </ContentControl.Style>
+    </ContentControl>
+</Window>

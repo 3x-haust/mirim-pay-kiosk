@@ -1,0 +1,10 @@
+[
+  {
+    "id": 1,
+    "name": "아메리카노",
+    "price": 2500,
+    "category": "커피",
+    "imagePath": "Images/americano.png",
+    "stock": 20
+  }
+]

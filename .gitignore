@@ -1,0 +1,11 @@
+# .NET build and test output
+**/bin/
+**/obj/
+**/TestResults/
+artifacts/
+
+# macOS metadata
+.DS_Store
+
+# Local omo state, tools, and evidence
+.omo/

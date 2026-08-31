@@ -1,0 +1,46 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=System.Runtime">
+    <sys:String x:Key="KioskLogoAssetPath">Images/mirim-logo.png</sys:String>
+    <sys:String x:Key="KioskMenuPlaceholderAssetPath">Images/menu-placeholder.png</sys:String>
+
+    <Geometry x:Key="KioskPlusGeometry">M 12,0 L 12,24 M 0,12 L 24,12</Geometry>
+    <Geometry x:Key="KioskMinusGeometry">M 0,12 L 24,12</Geometry>
+    <Geometry x:Key="KioskRemoveGeometry">M 3,3 L 21,21 M 21,3 L 3,21</Geometry>
+    <Geometry x:Key="KioskPayGeometry">M 34.5556,4 L 10.1111,4 C 6.735,4 4,6.735 4,10.1111 L 4,34.5556 M 34.5556,114 L 10.1111,114 C 6.735,114 4,111.265 4,107.889 L 4,83.4444 M 83.4444,114 L 107.889,114 C 111.265,114 114,111.265 114,107.889 L 114,83.4444 M 83.4444,4 L 107.889,4 C 111.265,4 114,6.735 114,10.1111 L 114,34.5556 M 59,34.5556 L 59,83.4444 M 83.4444,34.5556 L 83.4444,83.4444 M 34.5556,34.5556 L 34.5556,83.4444</Geometry>
+    <Geometry x:Key="KioskFaceGeometry">M 28.4444,4 L 16.2222,4 C 9.472,4 4,9.72 4,16.7778 L 4,29.5556 M 89.5556,4 L 101.778,4 C 108.528,4 114,9.72 114,16.7778 L 114,29.5556 M 83.4444,35.9444 L 83.4444,48.7222 M 34.5556,35.9444 L 34.5556,48.7222 M 40.6667,87.0556 C 40.6667,87.0556 46.7778,93.4444 59,93.4444 C 71.2222,93.4444 77.3333,87.0556 77.3333,87.0556 M 59,35.9444 L 59,67.8889 L 52.8889,67.8889 M 28.4444,119 L 16.2222,119 C 9.472,119 4,113.752 4,106.222 L 4,93.4444 M 89.5556,119 L 101.778,119 C 108.528,119 114,113.752 114,106.222 L 114,93.4444</Geometry>
+    <Geometry x:Key="KioskSuccessGlyphGeometry">M 201.564,145.59 C 207.451,145.59 213.086,146.674 218.385,148.508 L 218.385,137.253 L 209.974,95.5694 L 75.4103,95.5694 L 67,137.253 L 67,153.927 L 75.4103,153.927 L 75.4103,203.948 L 151.859,203.948 C 151.439,201.196 151.103,198.445 151.103,195.611 C 151.103,185.357 154.214,175.936 159.513,168.016 L 159.513,153.927 L 173.726,153.927 C 181.716,148.675 191.219,145.59 201.564,145.59 M 142.692,187.274 L 92.2308,187.274 L 92.2308,153.927 L 142.692,153.927 Z M 84.1569,137.253 L 89.2031,112.243 L 196.182,112.243 L 201.228,137.253 Z M 209.974,87.2326 L 75.4103,87.2326 L 75.4103,70.559 L 209.974,70.559 Z M 231,181.021 L 191.051,220.621 L 167.923,195.611 L 177.679,185.94 L 191.051,199.196 L 221.244,169.267 Z</Geometry>
+
+    <DrawingImage x:Key="KioskPayIcon">
+        <DrawingImage.Drawing>
+            <GeometryDrawing Geometry="{StaticResource KioskPayGeometry}">
+                <GeometryDrawing.Pen>
+                    <Pen Brush="{StaticResource KioskPrimaryStrongBrush}" Thickness="{StaticResource KioskIconStroke}" StartLineCap="Round" EndLineCap="Round" LineJoin="Round" />
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+    <DrawingImage x:Key="KioskFaceIcon">
+        <DrawingImage.Drawing>
+            <GeometryDrawing Geometry="{StaticResource KioskFaceGeometry}">
+                <GeometryDrawing.Pen>
+                    <Pen Brush="{StaticResource KioskBlackBrush}" Thickness="{StaticResource KioskIconStroke}" StartLineCap="Round" EndLineCap="Round" LineJoin="Round" />
+                </GeometryDrawing.Pen>
+            </GeometryDrawing>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+
+    <DrawingImage x:Key="KioskSuccessIcon">
+        <DrawingImage.Drawing>
+            <DrawingGroup>
+                <GeometryDrawing Brush="{StaticResource KioskSuccessBrush}">
+                    <GeometryDrawing.Geometry>
+                        <EllipseGeometry Center="140,139.13" RadiusX="140" RadiusY="139.13" />
+                    </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Brush="{StaticResource KioskTextOnPrimaryBrush}" Geometry="{StaticResource KioskSuccessGlyphGeometry}" />
+            </DrawingGroup>
+        </DrawingImage.Drawing>
+    </DrawingImage>
+</ResourceDictionary>

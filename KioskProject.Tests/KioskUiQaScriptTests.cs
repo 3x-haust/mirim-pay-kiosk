@@ -1,0 +1,201 @@
+using System.Management.Automation.Language;
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
+
+namespace KioskProject.Tests;
+
+public sealed class KioskUiQaScriptTests
+{
+    private static readonly string ScriptPath = Path.Combine(
+        ProductAssemblyFixture.RepositoryRoot, "script", "qa", "KioskUiQa.ps1");
+    private static readonly string Source = File.ReadAllText(ScriptPath);
+    private static readonly ScriptBlockAst Ast = ParseScript();
+    private static readonly XNamespace Automation =
+        "clr-namespace:System.Windows.Automation;assembly=PresentationCore";
+
+    [Fact]
+    public void Script_parses_and_exposes_only_required_paths()
+    {
+        Assert.NotNull(Ast.ParamBlock);
+        var parameterNames = Ast.ParamBlock.Parameters
+            .Select(parameter => parameter.Name.VariablePath.UserPath)
+            .ToArray();
+
+        Assert.Equal(new[] { "ExePath", "EvidenceDir" }, parameterNames);
+        Assert.All(Ast.ParamBlock.Parameters, parameter =>
+            Assert.Contains("Mandatory", parameter.Extent.Text, StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Script_uses_event_subscriptions_before_actions_with_bounded_waits()
+    {
+        Assert.Contains("WindowOpenedEvent", Source, StringComparison.Ordinal);
+        Assert.Contains("AddStructureChangedEventHandler", Source, StringComparison.Ordinal);
+        Assert.Contains("AddAutomationPropertyChangedEventHandler", Source, StringComparison.Ordinal);
+        Assert.Contains("ManualResetEventSlim", Source, StringComparison.Ordinal);
+        Assert.Contains("Wait(UiTimeoutMilliseconds)", Source, StringComparison.Ordinal);
+        Assert.Contains("RemoveStructureChangedEventHandler", Source, StringComparison.Ordinal);
+        Assert.Contains("RemoveAutomationPropertyChangedEventHandler", Source, StringComparison.Ordinal);
+
+        var helper = ExtractTypeMethod("InvokeAndWait");
+        Assert.True(helper.IndexOf("AddStructureChangedEventHandler", StringComparison.Ordinal) <
+                    helper.IndexOf("invokePattern.Invoke", StringComparison.Ordinal));
+        Assert.True(helper.IndexOf("AddAutomationPropertyChangedEventHandler", StringComparison.Ordinal) <
+                    helper.IndexOf("invokePattern.Invoke", StringComparison.Ordinal));
+        Assert.True(helper.IndexOf("invokePattern.Invoke", StringComparison.Ordinal) <
+                    helper.IndexOf("Wait(UiTimeoutMilliseconds)", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void Script_has_no_sleep_polling_or_coordinate_only_input()
+    {
+        var forbiddenCommands = Ast.FindAll(node => node is CommandAst, searchNestedScriptBlocks: true)
+            .Cast<CommandAst>()
+            .Select(command => command.GetCommandName())
+            .Where(name => name is not null && new[]
+            {
+                "Start-Sleep", "SendKeys", "Set-CursorPosition", "mouse_event"
+            }.Contains(name, StringComparer.OrdinalIgnoreCase))
+            .ToArray();
+        var pollingLoops = Ast.FindAll(
+            node => node is WhileStatementAst or DoWhileStatementAst or DoUntilStatementAst,
+            searchNestedScriptBlocks: true);
+
+        Assert.Empty(forbiddenCommands);
+        Assert.Empty(pollingLoops);
+        Assert.DoesNotContain("Thread.Sleep", Source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Happy_path_drives_only_live_stable_automation_ids()
+    {
+        var drivenIds = Regex.Matches(Source, "::(?:InvokeAndWait|SetValueAndWait)\\(\\$window, \\\"([^\\\"]+)\\\"")
+            .Select(match => match.Groups[1].Value)
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+        var xamlIds = Directory.GetFiles(Path.Combine(ProductAssemblyFixture.RepositoryRoot, "KioskProject"), "*.xaml", SearchOption.AllDirectories)
+            .Select(XDocument.Load)
+            .SelectMany(document => document.Descendants())
+            .Select(element => (string?)element.Attribute(Automation + "AutomationProperties.AutomationId"))
+            .Where(id => id is not null)
+            .Cast<string>()
+            .ToHashSet(StringComparer.Ordinal);
+
+        Assert.Equal(
+            new[] { "BarcodeAddButton", "BarcodeInput", "CartButton", "CompleteButton", "IncreaseButton", "NextButton", "OrderButton", "PayPaymentButton", "PaymentButton" },
+            drivenIds.Order(StringComparer.Ordinal));
+        Assert.All(drivenIds, id => Assert.Contains(id, xamlIds));
+        AssertInOrder("OrderButton", "BarcodeInput", "BarcodeAddButton", "CartButton", "IncreaseButton",
+            "PaymentButton", "PayPaymentButton", "NextButton", "CompleteButton");
+    }
+
+    [Fact]
+    public void Script_asserts_total_order_and_four_portrait_pngs()
+    {
+        Assert.Contains("5,000\\uC6D0", Source, StringComparison.Ordinal);
+        Assert.Contains("Assert-Order", Source, StringComparison.Ordinal);
+        Assert.Contains("totalPrice", Source, StringComparison.Ordinal);
+        Assert.Contains("paymentMethod", Source, StringComparison.Ordinal);
+        Assert.Contains("quantity", Source, StringComparison.Ordinal);
+
+        var captures = Regex.Matches(Source, "::Capture\\(\\$window, \\$EvidenceDir, \\\"([^\\\"]+\\.png)\\\"")
+            .Select(match => match.Groups[1].Value)
+            .ToArray();
+        Assert.Equal(new[] { "01-menu.png", "02-cart.png", "03-payment.png", "04-success.png" }, captures);
+        Assert.Contains("new Bitmap(1080, 1920", Source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Failure_fixture_and_cleanup_are_mandatory()
+    {
+        Assert.Contains("malformed", Source, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("\\uC0C1\\uD488 \\uC815\\uBCF4", Source, StringComparison.Ordinal);
+        Assert.Contains("AssertEnabled($window, \"OrderButton\", $false)", Source, StringComparison.Ordinal);
+        Assert.Contains("finally", Source, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("Stop-KioskProcess", Source, StringComparison.Ordinal);
+        Assert.Contains("Remove-Item -LiteralPath $qaTempRoot -Recurse -Force", Source, StringComparison.Ordinal);
+        Assert.Contains("cleanup-receipt.json", Source, StringComparison.Ordinal);
+        Assert.Contains("processAbsent", Source, StringComparison.Ordinal);
+        Assert.Contains("tempDirectoryAbsent", Source, StringComparison.Ordinal);
+        Assert.Contains("fixtureRestored", Source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Every_started_process_is_tracked_before_wait_and_independently_proven_absent()
+    {
+        var start = ExtractPowerShellFunction("Start-KioskProcess");
+        AssertInTextOrder(start,
+            "[KioskWindowWaiter]::new()", "Start-Process", "$script:trackedProcesses.Add($process)",
+            "$script:trackedPids.Add($process.Id)", "WaitForWindow($process)");
+        Assert.DoesNotContain("Process.Start(", Source, StringComparison.Ordinal);
+
+        var stop = ExtractPowerShellFunction("Stop-TrackedProcess");
+        AssertInTextOrder(stop, "$Process.Kill()", "$Process.WaitForExit(5000)");
+        Assert.Contains("GetProcessById", Source, StringComparison.Ordinal);
+        Assert.Contains("$remainingPids", Source, StringComparison.Ordinal);
+        Assert.Contains("trackedPids = @($trackedPids)", Source, StringComparison.Ordinal);
+        Assert.Contains("remainingPids = @($remainingPids)", Source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Validated_order_is_copied_and_hashed_before_temp_cleanup()
+    {
+        Assert.Contains("validated-order.json", Source, StringComparison.Ordinal);
+        Assert.Contains("evidence-manifest.json", Source, StringComparison.Ordinal);
+        AssertInTextOrder(Source,
+            "Assert-Order $ordersPath",
+            "Copy-Item -LiteralPath $ordersPath -Destination $validatedOrderPath",
+            "Get-FileHash -LiteralPath $validatedOrderPath -Algorithm SHA256",
+            "persist-order-evidence",
+            "Remove-Item -LiteralPath $qaTempRoot -Recurse -Force");
+        Assert.Contains("path = \"validated-order.json\"", Source, StringComparison.Ordinal);
+        Assert.Contains("sha256 = $validatedOrderHash", Source, StringComparison.Ordinal);
+    }
+
+    private static ScriptBlockAst ParseScript()
+    {
+        var ast = Parser.ParseFile(ScriptPath, out _, out var errors);
+        Assert.Empty(errors);
+        return ast;
+    }
+
+    private static string ExtractTypeMethod(string methodName)
+    {
+        var match = Regex.Match(Source,
+            $@"public static void {methodName}\b[\s\S]*?^    }}",
+            RegexOptions.Multiline | RegexOptions.CultureInvariant);
+        Assert.True(match.Success, $"Missing helper method {methodName}.");
+        return match.Value;
+    }
+
+    private static string ExtractPowerShellFunction(string functionName)
+    {
+        var function = Ast.FindAll(
+                node => node is FunctionDefinitionAst definition && definition.Name == functionName,
+                searchNestedScriptBlocks: true)
+            .Cast<FunctionDefinitionAst>()
+            .SingleOrDefault();
+        Assert.NotNull(function);
+        return function.Extent.Text;
+    }
+
+    private static void AssertInTextOrder(string text, params string[] values)
+    {
+        var cursor = -1;
+        foreach (var value in values)
+        {
+            cursor = text.IndexOf(value, cursor + 1, StringComparison.Ordinal);
+            Assert.True(cursor >= 0, $"Missing ordered contract {value}.");
+        }
+    }
+
+    private static void AssertInOrder(params string[] values)
+    {
+        var cursor = -1;
+        foreach (var value in values)
+        {
+            cursor = Source.IndexOf($"\"{value}\"", cursor + 1, StringComparison.Ordinal);
+            Assert.True(cursor >= 0, $"Missing ordered action {value}.");
+        }
+    }
+}

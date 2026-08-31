@@ -1,0 +1,289 @@
+<UserControl x:Class="KioskProject.Views.MenuView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:automation="clr-namespace:System.Windows.Automation;assembly=PresentationCore"
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
+             Background="{StaticResource KioskSurfaceBrush}">
+    <UserControl.Resources>
+        <sys:Double x:Key="MenuFooterHeight">260</sys:Double>
+        <sys:Double x:Key="MenuCardWidth">450</sys:Double>
+        <sys:Double x:Key="MenuCardMinHeight">560</sys:Double>
+        <sys:Double x:Key="MenuImageHeight">220</sys:Double>
+        <sys:Double x:Key="MenuLogoSize">110</sys:Double>
+        <Thickness x:Key="MenuSectionSpacing">54,38</Thickness>
+        <Thickness x:Key="MenuCardSpacing">18</Thickness>
+    </UserControl.Resources>
+
+    <ContentControl Style="{StaticResource KioskPortraitHostStyle}"
+                    Background="{StaticResource KioskSurfaceBrush}">
+        <Grid automation:AutomationProperties.AutomationId="MenuViewRoot"
+              ClipToBounds="True">
+            <Grid x:Name="StartState"
+                  automation:AutomationProperties.AutomationId="MenuStartState"
+                  Background="{StaticResource KioskPrimaryBrush}">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Visibility" Value="Visible" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsStartScreen}" Value="False">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="223" />
+                </Grid.RowDefinitions>
+                <TextBlock Margin="162,190,0,0"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Top"
+                           FontFamily="{StaticResource KioskBrandFontFamily}"
+                           FontSize="{StaticResource KioskTypeBrand}"
+                           FontWeight="Black"
+                           Foreground="{StaticResource KioskTextOnPrimaryBrush}"
+                           LineHeight="110"
+                           Text="MIRIM&#x0a;PAY"
+                           TextWrapping="Wrap" />
+                <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Foreground="{StaticResource KioskTextOnPrimaryBrush}"
+                               Text="이용 가능한 상품이 없습니다."
+                               TextAlignment="Center"
+                               TextWrapping="Wrap">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource KioskTextStyle}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Menu.IsEmpty}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <TextBlock Foreground="{StaticResource KioskTextOnPrimaryBrush}"
+                               Text="상품 정보를 불러오지 못했습니다."
+                               TextAlignment="Center"
+                               TextWrapping="Wrap">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource KioskTextStyle}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Menu.HasLoadError}" Value="True">
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+                <Button Grid.Row="1"
+                        automation:AutomationProperties.AutomationId="OrderButton"
+                        Width="418"
+                        IsEnabled="{Binding Menu.CanPurchase}"
+                        Command="{Binding StartOrderCommand}"
+                        Content="주문하기"
+                        Style="{StaticResource KioskOutlineButtonStyle}" />
+            </Grid>
+
+            <Grid x:Name="CatalogState"
+                  automation:AutomationProperties.AutomationId="MenuCatalogState"
+                  Background="{StaticResource KioskSurfaceBrush}">
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsStartScreen}" Value="False">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="{StaticResource KioskHeaderHeight}" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="{StaticResource MenuFooterHeight}" />
+                </Grid.RowDefinitions>
+
+                <Border Style="{StaticResource KioskHeaderStyle}">
+                    <Image Width="{StaticResource MenuLogoSize}"
+                           Height="{StaticResource MenuLogoSize}"
+                           Margin="26,0,0,0"
+                           HorizontalAlignment="Left"
+                           Source="{StaticResource KioskLogoAssetPath}"
+                           Stretch="Uniform" />
+                </Border>
+
+                <StackPanel Grid.Row="1" Margin="{StaticResource MenuSectionSpacing}">
+                    <TextBlock Style="{StaticResource KioskTitleTextStyle}"
+                               Text="메뉴를 선택해주세요"
+                               TextWrapping="Wrap" />
+                    <ItemsControl Margin="0,26,0,0"
+                                  Tag="{Binding Menu.SelectedCategory}"
+                                  ItemsSource="{Binding Menu.Categories}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button automation:AutomationProperties.AutomationId="CategoryFilterButton"
+                                        MinWidth="150"
+                                        Margin="0,0,16,16"
+                                        Command="{Binding DataContext.Menu.FilterCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                        CommandParameter="{Binding}"
+                                        Content="{Binding}"
+                                        Style="{StaticResource KioskSecondaryButtonStyle}" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Grid Margin="0,10,0,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="220" />
+                        </Grid.ColumnDefinitions>
+                        <TextBox automation:AutomationProperties.AutomationId="BarcodeInput"
+                                 MinHeight="{StaticResource KioskTouchTargetMin}"
+                                 Padding="{StaticResource KioskSpaceControl}"
+                                 VerticalContentAlignment="Center"
+                                 FontFamily="{StaticResource KioskFontFamily}"
+                                 FontSize="{StaticResource KioskTypeBody}"
+                                 Text="{Binding Menu.BarcodeInput, UpdateSourceTrigger=PropertyChanged}" />
+                        <Button Grid.Column="1"
+                                automation:AutomationProperties.AutomationId="BarcodeAddButton"
+                                Margin="16,0,0,0"
+                                Command="{Binding Menu.ScanBarcodeCommand}"
+                                Content="바코드 추가"
+                                Style="{StaticResource KioskPrimaryButtonStyle}" />
+                    </Grid>
+                    <TextBlock Margin="0,16,0,0"
+                               Foreground="{StaticResource KioskPrimaryStrongBrush}"
+                               TextWrapping="Wrap">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock" BasedOn="{StaticResource KioskTextStyle}">
+                                <Setter Property="Visibility" Value="Collapsed" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Menu.Status}" Value="invalid-barcode">
+                                        <Setter Property="Text" Value="바코드를 확인해주세요." />
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Menu.Status}" Value="unknown-barcode">
+                                        <Setter Property="Text" Value="등록되지 않은 상품입니다." />
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Menu.Status}" Value="out-of-stock">
+                                        <Setter Property="Text" Value="재고가 부족합니다." />
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Menu.Status}" Value="maximum-stock">
+                                        <Setter Property="Text" Value="재고가 부족합니다." />
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                    <DataTrigger Binding="{Binding Menu.Status}" Value="load-error">
+                                        <Setter Property="Text" Value="상품 정보를 불러오지 못했습니다." />
+                                        <Setter Property="Visibility" Value="Visible" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </StackPanel>
+
+                <ScrollViewer Grid.Row="2"
+                              Margin="{StaticResource KioskSpacePage}"
+                              HorizontalScrollBarVisibility="Disabled"
+                              VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding Menu.FilteredMenus}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel HorizontalAlignment="Center" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Width="{StaticResource MenuCardWidth}"
+                                        MinHeight="{StaticResource MenuCardMinHeight}"
+                                        Margin="{StaticResource MenuCardSpacing}"
+                                        Style="{StaticResource KioskCardStyle}">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="{StaticResource MenuImageHeight}" />
+                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="Auto" />
+                                        </Grid.RowDefinitions>
+                                        <Image Source="{Binding ImagePath, FallbackValue={StaticResource KioskMenuPlaceholderAssetPath}}"
+                                               Stretch="Uniform" />
+                                        <StackPanel Grid.Row="1" Margin="0,20,0,10">
+                                            <TextBlock Style="{StaticResource KioskTextStyle}"
+                                                       Text="{Binding Name}"
+                                                       TextWrapping="Wrap" />
+                                            <TextBlock Margin="0,8,0,0"
+                                                       Foreground="{StaticResource KioskPrimaryStrongBrush}"
+                                                       Style="{StaticResource KioskTextStyle}"
+                                                       Text="{Binding Price, StringFormat={}{0:N0}원}"
+                                                       TextWrapping="Wrap" />
+                                        </StackPanel>
+                                        <Button Grid.Row="2"
+                                                automation:AutomationProperties.AutomationId="AddButton"
+                                                Command="{Binding DataContext.Menu.AddCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                CommandParameter="{Binding}"
+                                                Content="담기"
+                                                Style="{StaticResource KioskPrimaryButtonStyle}" />
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+                <Border Grid.Row="2"
+                        automation:AutomationProperties.AutomationId="MenuEmptyState"
+                        Margin="{StaticResource KioskSpacePage}"
+                        Background="{StaticResource KioskSurfaceBrush}"
+                        Padding="{StaticResource KioskSpacePage}">
+                    <Border.Style>
+                        <Style TargetType="Border">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Menu.IsEmpty}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Border.Style>
+                    <TextBlock HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Style="{StaticResource KioskTextStyle}"
+                               Text="이용 가능한 상품이 없습니다."
+                               TextAlignment="Center"
+                               TextWrapping="Wrap" />
+                </Border>
+
+                <Border Grid.Row="3"
+                        Background="{StaticResource KioskSurfaceBrush}"
+                        BorderBrush="{StaticResource KioskTextBrush}"
+                        BorderThickness="1,1,0,0"
+                        Padding="{StaticResource KioskSpacePage}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock VerticalAlignment="Center"
+                                   Style="{StaticResource KioskTextStyle}"
+                                   Text="{Binding Cart.CartItems.Count, StringFormat=장바구니 {0}개}"
+                                   TextWrapping="Wrap" />
+                        <Button Grid.Column="1"
+                                automation:AutomationProperties.AutomationId="CartButton"
+                                MinWidth="300"
+                                Command="{Binding ShowCartCommand}"
+                                Content="장바구니 보기"
+                                Style="{StaticResource KioskPrimaryButtonStyle}" />
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+    </ContentControl>
+</UserControl>

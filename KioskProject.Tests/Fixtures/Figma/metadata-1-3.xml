@@ -1,0 +1,191 @@
+<canvas id="1:3" name="키오스크" x="0" y="0" width="0" height="0">
+  <frame id="229:667" name="메인" x="0" y="2364" width="1080" height="1920">
+    <frame id="527:1844" name="Frame 212" x="0" y="1" width="1080" height="1920">
+      <line id="229:675" name="Line 4" x="0" y="1408" width="101" height="0.000008829700618662173" />
+      <line id="229:674" name="Line 3" x="0" y="914" width="100" height="0" />
+      <line id="229:677" name="Line 2" x="101" y="0" width="0.00008392587233174709" height="1920" />
+      <line id="229:678" name="Line 13" x="0" y="142" width="1125" height="0" />
+    </frame>
+    <frame id="527:1843" name="Frame 211" x="384" y="1566" width="418" height="131">
+      <text id="229:676" name="주문하기" x="131" y="38.5" width="156" height="54" />
+    </frame>
+    <text id="229:673" name="MIRIM PAY" x="162" y="199" width="302" height="238" />
+  </frame>
+  <frame id="527:1813" name="페이" x="3567" y="2362" width="1080" height="1920">
+    <text id="527:1815" name="바코드 스캔중" x="404" y="155" width="315" height="69" />
+    <frame id="587:915" name="Frame 219" x="202" y="1488" width="676" height="342">
+      <text id="527:1816" name="파이보 입 부분에 바코드를 스캔해주세요!" x="123" y="0" width="430" height="134" />
+      <instance id="530:2252" name="취소 버튼" x="0" y="214" width="676" height="128" />
+    </frame>
+    <frame id="793:1487" name="Frame 226" x="0" y="299" width="1080" height="1089">
+      <rounded-rectangle id="530:2245" name="파이보 이미지" x="608" y="225" width="595" height="805" />
+      <rounded-rectangle id="1377:3606" name="바코드 스캔 이미지 복사 1" x="-371" y="29" width="1190" height="1031" />
+    </frame>
+  </frame>
+  <frame id="1487:1907" name="Frame 227" x="4767" y="330" width="1574" height="1031">
+    <rounded-rectangle id="1487:1904" name="파이보 이미지" x="979" y="196" width="595" height="805" />
+    <rounded-rectangle id="1487:1905" name="바코드 스캔 이미지 복사 1" x="0" y="0" width="1190" height="1031" />
+  </frame>
+  <frame id="635:92" name="얼굴 인식" x="3567" y="4512" width="1080" height="1920">
+    <text id="635:93" name="얼굴 인식 중" x="401" y="155" width="278" height="69" />
+    <text id="655:1145" name="얼굴 인식 중" x="401" y="155" width="278" height="69" />
+    <frame id="635:96" name="Frame 219" x="202" y="1486" width="676" height="342">
+      <text id="635:97" name="정면을 바라보고 인식을 기다려 주세요!" x="138" y="-3" width="400" height="134" />
+      <instance id="635:98" name="취소 버튼" x="0" y="214" width="676" height="128" />
+    </frame>
+    <frame id="527:1824" name="Frame 209" x="268" y="357" width="544" height="548">
+      <rounded-rectangle id="229:702" name="Rectangle 33226" x="0" y="0" width="544" height="548" />
+      <rounded-rectangle id="229:707" name="Rectangle 33225" x="13" y="12" width="519" height="524" />
+    </frame>
+  </frame>
+  <frame id="229:763" name="결제 수단 입력_페이" x="2378" y="2362" width="1080" height="1920">
+    <frame id="530:2276" name="Frame 214" x="1" y="1477" width="1080" height="443">
+      <instance id="527:1722" name="주문" x="85" y="43" width="910" height="131" />
+      <frame id="530:2355" name="Frame 218" x="36" y="239" width="1008" height="118">
+        <instance id="527:1747" name="이전버튼" x="0" y="0" width="489" height="118" />
+        <instance id="530:2353" name="다음버튼" x="519" y="0" width="489" height="118" />
+      </frame>
+    </frame>
+    <instance id="739:1086" name="결제 방법" x="66" y="530" width="949" height="409" />
+    <frame id="229:765" name="타이틀" x="75" y="234" width="551" height="144">
+      <text id="229:766" name="결제 수단 선택" x="0" y="0" width="551" height="66" />
+      <text id="229:767" name="결제 수단을 선택해주세요" x="0" y="96" width="551" height="48" />
+    </frame>
+    <frame id="530:2316" name="헤더" x="0" y="0" width="1080" height="152">
+      <rounded-rectangle id="530:2318" name="logo" x="26" y="21" width="110" height="110" />
+    </frame>
+  </frame>
+  <frame id="661:145" name="결제 수단 입력_얼굴인식" x="2378" y="4512" width="1080" height="1920">
+    <frame id="661:146" name="Frame 214" x="1" y="1477" width="1080" height="443">
+      <instance id="661:147" name="주문" x="85" y="43" width="910" height="131" />
+      <frame id="661:148" name="Frame 218" x="36" y="239" width="1008" height="118">
+        <instance id="661:149" name="이전버튼" x="0" y="0" width="489" height="118" />
+        <instance id="661:150" name="다음버튼" x="519" y="0" width="489" height="118" />
+      </frame>
+    </frame>
+    <frame id="661:151" name="타이틀" x="75" y="234" width="551" height="144">
+      <text id="661:152" name="결제 수단 선택" x="0" y="0" width="551" height="66" />
+      <text id="661:153" name="결제 수단을 선택해주세요" x="0" y="96" width="551" height="48" />
+    </frame>
+    <instance id="739:1069" name="결제 방법" x="66" y="530" width="949" height="409" />
+    <frame id="661:154" name="헤더" x="0" y="0" width="1080" height="152">
+      <rounded-rectangle id="661:155" name="logo" x="26" y="21" width="110" height="110" />
+    </frame>
+  </frame>
+  <frame id="663:78" name="결제 성공" x="10729" y="3384" width="1080" height="1920">
+    <frame id="663:91" name="Frame" x="87" y="99.99993896484375" width="906" height="1718.2608642578125">
+      <frame id="739:1059" name="Frame 225" x="163" y="300" width="580" height="560.2608642578125">
+        <frame id="739:1055" name="Group 18" x="150" y="0" width="280" height="278.2608642578125">
+          <ellipse id="739:1056" name="Ellipse 6" x="150" y="0" width="280" height="278.2608642578125" />
+          <vector id="739:1057" name="Vector" x="217" y="70.55900573730469" width="164" height="150.06211853027344" />
+        </frame>
+        <text id="739:1053" name="결제가 성공적으로 완료되었습니다!" x="0" y="428.2608642578125" width="580" height="132" />
+      </frame>
+      <text id="739:1054" name="MIRIM PAY" x="245.5" y="1360.2608642578125" width="415" height="58" />
+    </frame>
+  </frame>
+  <frame id="229:927" name="상품 바코드 " x="1189" y="2362" width="1080" height="1920">
+    <frame id="530:2311" name="Frame 216" x="0" y="1477" width="1080" height="443">
+      <instance id="527:1569" name="결제 버튼" x="742" y="239" width="304" height="108" />
+      <instance id="527:1715" name="주문" x="85" y="43" width="910" height="131" />
+    </frame>
+    <frame id="527:1109" name="제품 목록" x="37" y="391" width="1015" height="544">
+      <instance id="739:1668" name="상품" x="0" y="0" width="1015" height="164" />
+      <instance id="818:1539" name="상품" x="0" y="190" width="1015" height="164" />
+      <instance id="739:1707" name="상품" x="0" y="380" width="1015" height="164" />
+    </frame>
+    <frame id="527:1111" name="타이틀" x="54" y="230" width="521" height="57">
+      <text id="229:940" name="상품을 바코드에 찍어주세요" x="0" y="0" width="521" height="57" />
+    </frame>
+    <instance id="527:1433" name="상품 취소 버튼" x="804" y="215" width="230" height="96" />
+    <instance id="739:1100" name="헤더" x="0" y="0" width="1080" height="152" />
+  </frame>
+  <frame id="631:92" name="핀 입력" x="4756" y="3384" width="1080" height="1920">
+    <ellipse id="631:93" name="Ellipse 6" x="369" y="263" width="341" height="341" />
+    <text id="631:94" name="유*윤" x="472" y="656" width="134" height="72" />
+    <text id="631:95" name="결제 비밀번호 입력" x="344" y="120" width="391" height="63" />
+    <instance id="739:1784" name="핀 입력" x="306" y="830" width="468" height="70" />
+    <instance id="739:1789" name="핀 입력 버튼" x="224" y="1133" width="633" height="612" />
+  </frame>
+  <frame id="777:128" name="핀 입력" x="5945" y="3384" width="1080" height="1920">
+    <ellipse id="777:129" name="Ellipse 6" x="369" y="263" width="341" height="341" />
+    <text id="777:130" name="유*윤" x="472" y="656" width="134" height="72" />
+    <text id="777:131" name="결제 비밀번호 입력" x="344" y="120" width="391" height="63" />
+    <instance id="777:132" name="핀 입력" x="306" y="830" width="468" height="70" />
+    <instance id="777:133" name="핀 입력 버튼" x="224" y="1133" width="633" height="612" />
+  </frame>
+  <frame id="777:1416" name="핀 입력" x="7134" y="3384" width="1080" height="1920">
+    <ellipse id="777:1417" name="Ellipse 6" x="369" y="263" width="341" height="341" />
+    <text id="777:1418" name="유*윤" x="472" y="656" width="134" height="72" />
+    <text id="777:1419" name="결제 비밀번호 입력" x="344" y="120" width="391" height="63" />
+    <instance id="777:1420" name="핀 입력" x="306" y="830" width="468" height="70" />
+    <instance id="777:1421" name="핀 입력 버튼" x="224" y="1133" width="633" height="612" />
+  </frame>
+  <frame id="777:1442" name="핀 입력" x="8323" y="3384" width="1080" height="1920">
+    <ellipse id="777:1443" name="Ellipse 6" x="369" y="263" width="341" height="341" />
+    <text id="777:1444" name="유*윤" x="472" y="656" width="134" height="72" />
+    <text id="777:1445" name="결제 비밀번호 입력" x="344" y="120" width="391" height="63" />
+    <instance id="777:1446" name="핀 입력" x="306" y="830" width="468" height="70" />
+    <instance id="777:1447" name="핀 입력 버튼" x="223" y="1133" width="633" height="612" />
+  </frame>
+  <frame id="788:1513" name="핀 입력" x="9534" y="3384" width="1080" height="1920">
+    <ellipse id="788:1514" name="Ellipse 6" x="369" y="263" width="341" height="341" />
+    <text id="788:1515" name="유*윤" x="472" y="656" width="134" height="72" />
+    <text id="788:1516" name="결제 비밀번호 입력" x="344" y="120" width="391" height="63" />
+    <instance id="788:1517" name="핀 입력" x="306" y="830" width="468" height="70" />
+    <instance id="788:1518" name="핀 입력 버튼" x="223" y="1133" width="633" height="612" />
+  </frame>
+  <section id="527:1313" name="Section 1" x="-2883" y="2202" width="2339" height="3102">
+    <symbol id="527:1315" name="주문" x="100" y="768" width="910" height="131" />
+    <frame id="527:1430" name="상품 취소 버튼" x="162" y="413" width="268" height="230">
+      <symbol id="527:1429" name="on=on" x="20" y="20" width="230" height="96" />
+      <symbol id="527:1431" name="on=off" x="20" y="125" width="230" height="96" />
+    </frame>
+    <frame id="527:1457" name="버튼" x="511" y="393" width="204.1302032470703" height="179.02491760253906">
+      <symbol id="527:1446" name="Property 1=+" x="20" y="20" width="164.1302032470703" height="69.51245880126953" />
+      <symbol id="527:1468" name="Property 1=-+" x="20" y="89.51245880126953" width="164.1302032470703" height="69.51245880126953" />
+    </frame>
+    <frame id="527:1566" name="결제 버튼" x="776" y="414" width="326" height="216">
+      <symbol id="527:1565" name="Property 1=on" x="20" y="0" width="304" height="108" />
+      <symbol id="527:1567" name="Property 1=off" x="20" y="108" width="304" height="108" />
+    </frame>
+    <frame id="527:1596" name="결제 방법" x="133" y="1273" width="969" height="838">
+      <symbol id="527:1595" name="Property 1=pay" x="10" y="10" width="949" height="409" />
+      <symbol id="527:1597" name="Property 1=face" x="10" y="419" width="949" height="409" />
+    </frame>
+    <frame id="527:1736" name="이전버튼" x="1248" y="1359" width="529" height="126">
+      <symbol id="527:1735" name="Property 1=on" x="20" y="4" width="489" height="118" />
+    </frame>
+    <frame id="530:2349" name="다음버튼" x="1248" y="1728" width="529" height="126">
+      <symbol id="530:2350" name="Property 1=on" x="20" y="4" width="489" height="118" />
+    </frame>
+    <symbol id="530:2251" name="취소 버튼" x="1248" y="834" width="676" height="128" />
+    <symbol id="739:1099" name="헤더" x="175" y="2508" width="1080" height="152" />
+    <symbol id="739:1666" name="상품" x="154" y="91" width="1015" height="164" />
+    <frame id="739:1743" name="핀 입력" x="1482" y="121" width="508" height="470">
+      <symbol id="739:1742" name="Property 1=0" x="20" y="20" width="468" height="70" />
+      <symbol id="739:1759" name="Property 1=1" x="20" y="110" width="468" height="70" />
+      <symbol id="739:1744" name="Property 1=2" x="20" y="200" width="468" height="70" />
+      <symbol id="739:1749" name="Property 1=3" x="20" y="290" width="468" height="70" />
+      <symbol id="739:1754" name="Property 1=4" x="20" y="380" width="468" height="70" />
+    </frame>
+    <symbol id="739:1783" name="핀 입력 버튼" x="1357" y="2097" width="633" height="612" />
+  </section>
+  <rounded-rectangle id="530:2262" name="image 71" x="3616" y="713" width="800" height="1096" />
+  <vector id="530:2265" name="Vector 1" x="3988" y="1916" width="0" height="361" />
+  <frame id="659:111" name="Frame 220" x="-95" y="-659" width="3143" height="1920">
+    <rounded-rectangle id="659:94" name="Rectangle 33301" x="0" y="0" width="3143" height="1920" />
+    <frame id="659:101" name="메인" x="1032" y="0" width="1080" height="1920">
+      <frame id="659:102" name="Frame 212" x="0" y="1" width="1080" height="1920">
+        <line id="659:103" name="Line 4" x="0" y="1408" width="101" height="0.000008829700391288497" />
+        <line id="659:104" name="Line 3" x="0" y="914" width="100" height="0" />
+        <line id="659:105" name="Line 2" x="101" y="0" width="0.00008392587233174709" height="1920" />
+        <line id="659:106" name="Line 13" x="0" y="142" width="1125" height="0" />
+      </frame>
+      <frame id="659:107" name="Frame 211" x="384" y="1566" width="418" height="131">
+        <text id="659:108" name="주문하기" x="131" y="38.5" width="156" height="54" />
+      </frame>
+      <text id="659:109" name="MIRIM PAY" x="162" y="199" width="302" height="238" />
+    </frame>
+  </frame>
+</canvas>
