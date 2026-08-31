@@ -116,6 +116,7 @@ public sealed class KioskShellCompositionTests
         Assert.Equal("None", (string?)window.Attribute("WindowStyle"));
         Assert.Equal("NoResize", (string?)window.Attribute("ResizeMode"));
         Assert.Equal("Maximized", (string?)window.Attribute("WindowState"));
+        Assert.Equal("True", (string?)window.Attribute("ShowInTaskbar"));
         Assert.DoesNotMatch(@"\bFrame\b|NavigationService|\bNavigate\s*\(", productSource);
         var shellSource = string.Join('\n', new[] { "App.xaml.cs", "MainWindow.xaml", "MainWindow.xaml.cs" }
             .Select(Source)
