@@ -172,14 +172,34 @@ public class JsonDataService : IDataService
         RequireNonBlankString(item, "imagePath", index);
         var imagePath = item.GetProperty("imagePath").GetString()!;
         var imageSegments = imagePath.Split('/');
-        var imagesDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "Images"));
-        var imageFilePath = Path.GetFullPath(Path.Combine(imagesDirectory, imagePath));
         if (Uri.TryCreate(imagePath, UriKind.Absolute, out _) ||
             Path.IsPathRooted(imagePath) ||
+            imagePath.IndexOfAny(Path.GetInvalidPathChars()) >= 0 ||
             imagePath.Contains('\\') ||
             imageSegments.Any(segment => segment is "" or "." or "..") ||
-            !imagePath.StartsWith("Images/", StringComparison.Ordinal) ||
-            !imageFilePath.StartsWith(imagesDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+            !imagePath.StartsWith("Images/", StringComparison.Ordinal))
+        {
+            throw InvalidMenu(index, "imagePath must be a canonical packaged asset path");
+        }
+
+        var imagesDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "Images"));
+        try
+        {
+            var imageFilePath = Path.GetFullPath(Path.Combine(imagesDirectory, imagePath));
+            if (!imageFilePath.StartsWith(imagesDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+            {
+                throw InvalidMenu(index, "imagePath must be a canonical packaged asset path");
+            }
+        }
+        catch (ArgumentException)
+        {
+            throw InvalidMenu(index, "imagePath must be a canonical packaged asset path");
+        }
+        catch (NotSupportedException)
+        {
+            throw InvalidMenu(index, "imagePath must be a canonical packaged asset path");
+        }
+        catch (PathTooLongException)
         {
             throw InvalidMenu(index, "imagePath must be a canonical packaged asset path");
         }

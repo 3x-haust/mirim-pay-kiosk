@@ -176,6 +176,20 @@ public sealed class JsonDataServiceLoadMenusTests
     }
 
     [Fact]
+    public void LoadMenus_throws_invalid_data_when_image_path_contains_embedded_nul()
+    {
+        // Given
+        var imagePath = "Images/a\0.png";
+        var item = ValidItem(overrides: new Dictionary<string, string>
+        {
+            ["imagePath"] = JsonSerializer.Serialize(imagePath)
+        });
+
+        // When / Then
+        AssertInvalidItem(item);
+    }
+
+    [Fact]
     public void LoadMenus_throws_invalid_data_when_id_is_duplicated()
     {
         // Given
