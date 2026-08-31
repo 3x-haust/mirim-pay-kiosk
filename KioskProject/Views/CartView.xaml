@@ -11,15 +11,22 @@
         <Thickness x:Key="CartTitleSpacing">54,62,54,38</Thickness>
         <Thickness x:Key="CartListSpacing">54,0,54,30</Thickness>
         <Thickness x:Key="CartItemSpacing">0,13</Thickness>
+        <TranslateTransform x:Key="CartClearButtonOffset" X="-1" Y="2" />
+        <TranslateTransform x:Key="CartCardUpTransform" Y="-5" />
+        <TranslateTransform x:Key="CartControlsDownTransform" Y="5" />
+        <ControlTemplate x:Key="CartTransparentButtonTemplate" TargetType="Button">
+            <Border Background="Transparent" BorderBrush="Transparent" BorderThickness="0" Padding="0">
+                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+        </ControlTemplate>
 
-        <Style x:Key="CartIconButtonStyle"
-               TargetType="Button"
-               BasedOn="{StaticResource KioskPrimaryButtonStyle}">
+        <Style x:Key="CartIconButtonStyle" TargetType="Button">
             <Setter Property="Width" Value="{StaticResource CartQuantityButtonSize}" />
             <Setter Property="Height" Value="{StaticResource CartQuantityButtonSize}" />
             <Setter Property="MinWidth" Value="{StaticResource CartQuantityButtonSize}" />
             <Setter Property="MinHeight" Value="{StaticResource CartQuantityButtonSize}" />
-            <Setter Property="Padding" Value="{StaticResource KioskSpaceCompact}" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Template" Value="{StaticResource CartTransparentButtonTemplate}" />
         </Style>
     </UserControl.Resources>
 
@@ -60,24 +67,34 @@
                            TextWrapping="Wrap" />
                 <Button Grid.Column="1"
                         automation:AutomationProperties.AutomationId="ClearCartButton"
-                        MinWidth="220"
+                        Width="230"
+                        Height="95"
+                        MinHeight="0"
+                        Margin="0,0,-9,0"
+                        Background="{StaticResource KioskPrimaryStrongBrush}"
+                        BorderBrush="{StaticResource KioskPrimaryStrongBrush}"
+                        RenderTransform="{StaticResource CartClearButtonOffset}"
+                        MinWidth="0"
                         Command="{Binding ClearCartCommand}"
                         Content="상품 전체 삭제"
                         Style="{StaticResource KioskPrimaryButtonStyle}" />
             </Grid>
 
             <ScrollViewer Grid.Row="2"
-                          Width="{StaticResource CartListWidth}"
-                          Margin="37,0,0,0"
+                          Width="1022"
+                          Margin="30,25,0,0"
+                          Padding="0"
                           HorizontalAlignment="Left"
                           HorizontalScrollBarVisibility="Disabled"
                           VerticalScrollBarVisibility="Auto">
-                <ItemsControl ItemsSource="{Binding Cart.CartItems}">
+                <ItemsControl Margin="7,24,0,0" ItemsSource="{Binding Cart.CartItems}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Grid Height="{StaticResource CartItemHeight}"
                                   Margin="{StaticResource CartItemGap}">
                                 <Border Tag="{StaticResource KioskCardRadius}"
+                                        Padding="31,27,31,27"
+                                        RenderTransform="{StaticResource CartCardUpTransform}"
                                         Style="{StaticResource KioskCardStyle}">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
@@ -90,81 +107,80 @@
                                                        Style="{StaticResource KioskTextStyle}"
                                                        Text="{Binding Menu.Name}"
                                                        TextWrapping="Wrap" />
-                                            <StackPanel Margin="0,12,0,0" Orientation="Horizontal">
+                                            <StackPanel Margin="0,12,0,0" Orientation="Horizontal" Tag="{Binding Subtotal}">
                                                 <TextBlock Foreground="{StaticResource KioskPrimaryStrongBrush}"
                                                            Style="{StaticResource KioskTextStyle}"
                                                            Text="{Binding Menu.Price, StringFormat={}{0:N0}원}"
                                                            TextWrapping="Wrap" />
-                                                <TextBlock Margin="20,0,0,0"
-                                                           Foreground="{StaticResource KioskTextSecondaryBrush}"
-                                                           Style="{StaticResource KioskTextStyle}"
-                                                           Text="{Binding Subtotal, StringFormat=소계 {0:N0}원}"
-                                                           TextWrapping="Wrap" />
+
                                             </StackPanel>
                                         </StackPanel>
 
-                                        <StackPanel Grid.Column="1"
-                                                    VerticalAlignment="Center"
-                                                    Orientation="Horizontal">
-                                            <Button automation:AutomationProperties.AutomationId="DecreaseButton"
+                                        <Canvas Grid.ColumnSpan="2"
+                                                RenderTransform="{StaticResource CartControlsDownTransform}">
+                                            <Button Canvas.Left="762" Canvas.Top="0"
+                                                    automation:AutomationProperties.AutomationId="DecreaseButton"
                                                     Command="{Binding DataContext.Cart.DecreaseCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                     CommandParameter="{Binding}"
                                                     Style="{StaticResource CartIconButtonStyle}">
                                                 <Border Width="{StaticResource CartQuantityVisualSize}"
                                                         Height="{StaticResource CartQuantityVisualSize}"
-                                                        Background="{StaticResource KioskDisabledBrush}"
+                                                        Background="{StaticResource KioskControlBorderBrush}"
                                                         CornerRadius="{StaticResource CartQuantityVisualRadius}">
                                                     <Path Width="24" Height="24"
                                                           Data="{StaticResource KioskMinusGeometry}"
-                                                          Stroke="{StaticResource KioskTextBrush}"
-                                                          StrokeThickness="{StaticResource KioskIconStroke}"
+                                                          Stroke="{StaticResource KioskTextOnPrimaryBrush}"
+                                                          StrokeThickness="3"
                                                           Stretch="Uniform" />
                                                 </Border>
                                             </Button>
-                                            <TextBlock MinWidth="{StaticResource CartQuantityVisualSize}"
+                                            <TextBlock Canvas.Left="832" Canvas.Top="15"
+                                                       Width="50"
+                                                       MinWidth="{StaticResource CartQuantityVisualSize}"
                                                        FontSize="{StaticResource KioskTypeAction}"
-                                                       HorizontalAlignment="Center"
-                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Left"
+                                                       VerticalAlignment="Top"
                                                        TextAlignment="Center"
                                                        Style="{StaticResource KioskTextStyle}"
                                                        Text="{Binding Quantity}"
                                                        TextWrapping="Wrap" />
-                                            <Button automation:AutomationProperties.AutomationId="IncreaseButton"
+                                            <Button Canvas.Left="864" Canvas.Top="-1"
+                                                    automation:AutomationProperties.AutomationId="IncreaseButton"
                                                     Command="{Binding DataContext.Cart.IncreaseCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                     CommandParameter="{Binding}"
                                                     Style="{StaticResource CartIconButtonStyle}">
                                                 <Border Width="{StaticResource CartQuantityVisualSize}"
                                                         Height="{StaticResource CartQuantityVisualSize}"
-                                                        Background="{StaticResource KioskPrimaryBrush}"
+                                                        Background="{StaticResource KioskPrimaryStrongBrush}"
                                                         CornerRadius="{StaticResource CartQuantityVisualRadius}">
                                                     <Path Width="24" Height="24"
                                                           Data="{StaticResource KioskPlusGeometry}"
                                                           Stroke="{StaticResource KioskTextOnPrimaryBrush}"
-                                                          StrokeThickness="{StaticResource KioskIconStroke}"
+                                                          StrokeThickness="3"
                                                           Stretch="Uniform" />
                                                 </Border>
                                             </Button>
-                                        </StackPanel>
+                                        </Canvas>
                                     </Grid>
                                 </Border>
 
                                 <Button automation:AutomationProperties.AutomationId="RemoveButton"
                                         Width="{StaticResource KioskTouchTargetMin}"
                                         Height="{StaticResource KioskTouchTargetMin}"
-                                        Margin="-32,-32,0,0"
+                                        Margin="-39,-35,0,0"
                                         HorizontalAlignment="Left"
                                         VerticalAlignment="Top"
                                         Command="{Binding DataContext.Cart.RemoveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                         CommandParameter="{Binding}"
-                                        Style="{StaticResource KioskSecondaryButtonStyle}">
+                                        Style="{StaticResource CartIconButtonStyle}">
                                     <Border Width="{StaticResource CartQuantityVisualSize}"
                                             Height="{StaticResource CartQuantityVisualSize}"
-                                            Background="{StaticResource KioskDisabledBrush}"
+                                            Background="{StaticResource KioskCartRemoveBrush}"
                                             CornerRadius="{StaticResource CartQuantityVisualRadius}">
                                         <Path Width="24" Height="24"
                                               Data="{StaticResource KioskRemoveGeometry}"
-                                              Stroke="{StaticResource KioskTextBrush}"
-                                              StrokeThickness="{StaticResource KioskIconStroke}"
+                                              Stroke="{StaticResource KioskTextOnPrimaryBrush}"
+                                              StrokeThickness="3"
                                               Stretch="Uniform" />
                                     </Border>
                                 </Button>
@@ -201,13 +217,8 @@
                     BorderBrush="{StaticResource KioskTextBrush}"
                     BorderThickness="0,1,0,0"
                     Padding="{StaticResource CartFooterInset}">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <Grid>
+                <Canvas Margin="-85,-88,-85,0" Width="1080" Height="400">
+                    <Grid Canvas.Left="85" Canvas.Top="43" Width="910">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
@@ -224,7 +235,7 @@
                                    Text="{Binding Cart.TotalQuantity, StringFormat={}{0}개}"
                                    TextWrapping="Wrap" />
                     </Grid>
-                    <Grid Grid.Row="1" Margin="0,28,0,0">
+                    <Grid Canvas.Left="85" Canvas.Top="117" Width="910" Margin="0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
@@ -240,17 +251,22 @@
                                    Text="{Binding Cart.TotalPrice, StringFormat={}{0}원}"
                                    TextWrapping="Wrap" />
                     </Grid>
-                    <Button Grid.Row="2"
+                    <Button Canvas.Left="742" Canvas.Top="239"
                             automation:AutomationProperties.AutomationId="PaymentButton"
                             Width="{StaticResource CartPaymentButtonWidth}"
                             Height="{StaticResource KioskActionHeight}"
-                            Margin="0,44,0,0"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Bottom"
+                            Margin="0"
+                            HorizontalAlignment="Left"
+                            VerticalAlignment="Top"
                             Command="{Binding ShowPaymentCommand}"
                             Content="결제하기">
                         <Button.Style>
                             <Style TargetType="Button" BasedOn="{StaticResource KioskPrimaryButtonStyle}">
+                                <Setter Property="MinHeight" Value="0" />
+                                <Setter Property="Height" Value="95" />
+                                <Setter Property="Width" Value="230" />
+                                <Setter Property="Background" Value="{StaticResource KioskPrimaryBrush}" />
+                                <Setter Property="BorderBrush" Value="{StaticResource KioskPrimaryBrush}" />
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding Cart.CartItems.Count}" Value="0">
                                         <Setter Property="IsEnabled" Value="False" />
@@ -259,7 +275,7 @@
                             </Style>
                         </Button.Style>
                     </Button>
-                </Grid>
+                </Canvas>
             </Border>
         </Grid>
     </ContentControl>

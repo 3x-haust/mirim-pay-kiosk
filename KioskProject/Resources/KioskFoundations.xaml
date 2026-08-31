@@ -9,6 +9,7 @@
     <Color x:Key="KioskBlackColor">#FF000000</Color>
     <Color x:Key="KioskTextColor">#FF3F3F3F</Color>
     <Color x:Key="KioskTextSecondaryColor">#FF808080</Color>
+    <Color x:Key="KioskCartRemoveColor">#FF7F7F7F</Color>
     <Color x:Key="KioskBorderColor">#FFD7D7D7</Color>
     <Color x:Key="KioskControlBorderColor">#FFCECECE</Color>
     <Color x:Key="KioskDisabledColor">#FFD0D0D0</Color>
@@ -23,6 +24,7 @@
     <SolidColorBrush x:Key="KioskTextOnPrimaryBrush" Color="{StaticResource KioskWhiteColor}" />
     <SolidColorBrush x:Key="KioskTextBrush" Color="{StaticResource KioskTextColor}" />
     <SolidColorBrush x:Key="KioskTextSecondaryBrush" Color="{StaticResource KioskTextSecondaryColor}" />
+    <SolidColorBrush x:Key="KioskCartRemoveBrush" Color="{StaticResource KioskCartRemoveColor}" />
     <SolidColorBrush x:Key="KioskBorderBrush" Color="{StaticResource KioskBorderColor}" />
     <SolidColorBrush x:Key="KioskControlBorderBrush" Color="{StaticResource KioskControlBorderColor}" />
     <SolidColorBrush x:Key="KioskDisabledBrush" Color="{StaticResource KioskDisabledColor}" />
@@ -31,6 +33,7 @@
 
     <FontFamily x:Key="KioskFontFamily">Pretendard, Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo</FontFamily>
     <FontFamily x:Key="KioskBrandFontFamily">Pretendard, Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo</FontFamily>
+    <FontFamily x:Key="KioskInterFontFamily">pack://application:,,,/KioskProject;component/Fonts/#Inter</FontFamily>
 
     <sys:Double x:Key="KioskTypeBrand">100</sys:Double>
     <sys:Double x:Key="KioskTypeDisplay">55</sys:Double>

@@ -10,6 +10,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Resource Include="Fonts\Inter-Bold.otf" />
+    <None Include="Fonts\Inter-LICENSE.txt" />
     <Content Include="Data\*.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>

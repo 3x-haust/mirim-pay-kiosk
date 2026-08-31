@@ -55,7 +55,7 @@ public sealed class KioskFigmaVisualContractTests
     {
         var xaml = Load("CartView.xaml");
         var scroll = xaml.Descendants().Single(e => e.Name.LocalName == "ScrollViewer");
-        AssertResource("CartListWidth"); Assert.Equal("{StaticResource CartListWidth}", scroll.Attribute("Width")?.Value);
+        AssertResource("CartListWidth"); Assert.Equal("1022", scroll.Attribute("Width")?.Value);
         var item = xaml.Descendants().Single(e => e.Name.LocalName == "DataTemplate").Descendants().First(e => e.Name.LocalName == "Grid");
         Assert.Equal("{StaticResource CartItemHeight}", item.Attribute("Height")?.Value); Assert.Equal("{StaticResource CartItemGap}", item.Attribute("Margin")?.Value);
         var card = item.Descendants().First(e => e.Name.LocalName == "Border"); Assert.Equal("{StaticResource KioskCardRadius}", card.Attribute("Tag")?.Value);
@@ -101,6 +101,28 @@ public sealed class KioskFigmaVisualContractTests
         Assert.Equal("{StaticResource PaymentSuccessMessageType}", message.Attribute("FontSize")?.Value);
         var complete = ById(xaml, "CompleteButton"); Assert.Equal("{StaticResource CompleteButtonX}", complete.Attribute("Canvas.Left")?.Value); Assert.Equal("{StaticResource CompleteButtonY}", complete.Attribute("Canvas.Top")?.Value);
         Assert.Equal("{StaticResource CompleteButtonWidth}", complete.Attribute("Width")?.Value); Assert.NotNull(complete.Attribute("Command"));
+    }
+
+    [Fact]
+    public void Success_brand_uses_bundled_Inter_Bold_resource()
+    {
+        var fontPath = Path.Combine(Root, "Fonts", "Inter-Bold.otf");
+        var fontBytes = File.ReadAllBytes(fontPath);
+        Assert.True(fontBytes.Length > 0);
+        Assert.Equal("OTTO", System.Text.Encoding.ASCII.GetString(fontBytes, 0, 4));
+
+        var project = File.ReadAllText(Path.Combine(Root, "KioskProject.csproj"));
+        Assert.Contains("Fonts\\Inter-Bold.otf", project, StringComparison.Ordinal);
+
+        var foundations = XDocument.Load(Foundations);
+        var font = foundations.Descendants().Single(e => (string?)e.Attribute(Xaml + "Key") == "KioskInterFontFamily");
+        Assert.Equal("pack://application:,,,/KioskProject;component/Fonts/#Inter", font.Value.Trim());
+
+        var button = XDocument.Load(Path.Combine(Views, "PaymentView.xaml")).Descendants()
+            .Single(e => (string?)e.Attribute(Automation + "AutomationProperties.AutomationId") == "CompleteButton");
+        Assert.Equal("{StaticResource SuccessAcknowledgeButtonStyle}", button.Attribute("Style")?.Value);
+        var style = button.Document!.Descendants().Single(e => (string?)e.Attribute(Xaml + "Key") == "SuccessAcknowledgeButtonStyle");
+        Assert.Equal("{StaticResource KioskInterFontFamily}", style.Descendants().Single(e => e.Name.LocalName == "Setter" && (string?)e.Attribute("Property") == "FontFamily").Attribute("Value")?.Value);
     }
 
     private static XElement ById(XDocument document, string id) => document.Descendants().Single(e => (string?)e.Attribute(Automation + "AutomationProperties.AutomationId") == id);
