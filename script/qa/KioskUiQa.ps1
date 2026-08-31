@@ -44,6 +44,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Automation;
 
@@ -127,6 +128,13 @@ public sealed class KioskWindowWaiter : IDisposable
 
 public static class KioskUiQa
 {
+    [DllImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static extern bool SetCursorPos(int x, int y);
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmFlush();
+
     public const int UiTimeoutMilliseconds = 15000;
     public const string CartCountOne = "\uC7A5\uBC14\uAD6C\uB2C8 1\uAC1C";
     public const string ExpectedTotal = "5000\uC6D0";
@@ -257,6 +265,9 @@ public static class KioskUiQa
         using (Graphics graphics = Graphics.FromImage(portrait))
         using (ImageAttributes attributes = new ImageAttributes())
         {
+            if (!SetCursorPos(source.Left, source.Top))
+                throw new System.ComponentModel.Win32Exception(Marshal.GetLastWin32Error());
+            Marshal.ThrowExceptionForHR(DwmFlush());
             captureGraphics.CopyFromScreen(source.Location, Point.Empty, source.Size);
             graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
             graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;

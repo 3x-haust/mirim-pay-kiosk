@@ -125,6 +125,20 @@ public sealed class KioskUiQaScriptTests
     }
 
     [Fact]
+    public void Capture_normalizes_cursor_and_flushes_compositor_before_screen_copy()
+    {
+        var capture = ExtractTypeMethod("Capture");
+
+        Assert.Contains("SetCursorPos", capture, StringComparison.Ordinal);
+        Assert.Contains("DwmFlush", capture, StringComparison.Ordinal);
+        Assert.Contains("source.Left", capture, StringComparison.Ordinal);
+        Assert.Contains("source.Top", capture, StringComparison.Ordinal);
+        Assert.Contains("GetLastWin32Error", capture, StringComparison.Ordinal);
+        Assert.Contains("ThrowExceptionForHR", capture, StringComparison.Ordinal);
+        AssertInTextOrder(capture, "SetCursorPos", "DwmFlush", "CopyFromScreen");
+    }
+
+    [Fact]
     public void Capture_uses_centered_largest_nine_by_sixteen_source_rectangle()
     {
         var capture = ExtractTypeMethod("GetCaptureRectangle");
