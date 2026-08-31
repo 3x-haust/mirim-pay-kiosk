@@ -5,7 +5,7 @@
              xmlns:sys="clr-namespace:System;assembly=System.Runtime"
              Background="{StaticResource KioskSurfaceBrush}">
     <UserControl.Resources>
-        <sys:Double x:Key="CartFooterHeight">443</sys:Double>
+        <GridLength x:Key="CartFooterHeight">443</GridLength>
         <sys:Double x:Key="CartItemMinHeight">176</sys:Double>
         <sys:Double x:Key="CartLogoSize">110</sys:Double>
         <sys:Double x:Key="CartQuantityButtonSize">96</sys:Double>
@@ -30,7 +30,7 @@
               Background="{StaticResource KioskSurfaceBrush}"
               ClipToBounds="True">
             <Grid.RowDefinitions>
-                <RowDefinition Height="{StaticResource KioskHeaderHeight}" />
+                <RowDefinition Height="{StaticResource KioskHeaderRowHeight}" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="{StaticResource CartFooterHeight}" />

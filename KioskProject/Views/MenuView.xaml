@@ -5,10 +5,10 @@
              xmlns:sys="clr-namespace:System;assembly=System.Runtime"
              Background="{StaticResource KioskSurfaceBrush}">
     <UserControl.Resources>
-        <sys:Double x:Key="MenuFooterHeight">260</sys:Double>
+        <GridLength x:Key="MenuFooterHeight">260</GridLength>
         <sys:Double x:Key="MenuCardWidth">450</sys:Double>
         <sys:Double x:Key="MenuCardMinHeight">560</sys:Double>
-        <sys:Double x:Key="MenuImageHeight">220</sys:Double>
+        <GridLength x:Key="MenuImageHeight">220</GridLength>
         <sys:Double x:Key="MenuLogoSize">110</sys:Double>
         <Thickness x:Key="MenuSectionSpacing">54,38</Thickness>
         <Thickness x:Key="MenuCardSpacing">18</Thickness>
@@ -101,7 +101,7 @@
                     </Style>
                 </Grid.Style>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="{StaticResource KioskHeaderHeight}" />
+                    <RowDefinition Height="{StaticResource KioskHeaderRowHeight}" />
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="{StaticResource MenuFooterHeight}" />

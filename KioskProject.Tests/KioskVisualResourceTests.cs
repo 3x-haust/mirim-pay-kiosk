@@ -104,6 +104,55 @@ public sealed class KioskVisualResourceTests
     }
 
     [Fact]
+    public void Grid_dimensions_do_not_consume_double_static_resources()
+    {
+        // Given
+        var paths = Directory.GetFiles(ProjectRoot, "*.xaml", SearchOption.AllDirectories)
+            .Where(path => !path.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal) &&
+                           !path.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
+            .ToArray();
+        var documents = paths.Select(path => (Path: path, Document: Load(path))).ToArray();
+        var doubleKeys = documents.SelectMany(source => source.Document.Descendants())
+            .Where(element => element.Name.LocalName == "Double" &&
+                              element.Name.NamespaceName == "clr-namespace:System;assembly=System.Runtime")
+            .Select(element => (string?)element.Attribute(Xaml + "Key"))
+            .Where(key => key is not null)
+            .Cast<string>()
+            .ToHashSet(StringComparer.Ordinal);
+
+        // When
+        var violations = documents.SelectMany(source => source.Document.Descendants()
+                .Where(element => element.Name == Presentation + "RowDefinition" ||
+                                  element.Name == Presentation + "ColumnDefinition")
+                .Select(element => new
+                {
+                    source.Path,
+                    Element = element.Name.LocalName,
+                    Dimension = element.Name == Presentation + "RowDefinition" ? "Height" : "Width",
+                    Value = (string?)element.Attribute(
+                        element.Name == Presentation + "RowDefinition" ? "Height" : "Width")
+                }))
+            .Where(candidate => candidate.Value is not null)
+            .Select(candidate => new
+            {
+                candidate.Path,
+                candidate.Element,
+                candidate.Dimension,
+                Match = Regex.Match(candidate.Value!, @"^\{StaticResource\s+([^}\s,]+)\}$")
+            })
+            .Where(candidate => candidate.Match.Success && doubleKeys.Contains(candidate.Match.Groups[1].Value))
+            .Select(candidate =>
+                $"{Path.GetRelativePath(ProjectRoot, candidate.Path)}:{candidate.Element}.{candidate.Dimension} -> {candidate.Match.Groups[1].Value}")
+            .Order(StringComparer.Ordinal)
+            .ToArray();
+
+        // Then
+        Assert.True(
+            violations.Length == 0,
+            $"Grid dimensions cannot consume sys:Double StaticResources: {string.Join(", ", violations)}");
+    }
+
+    [Fact]
     public void Controls_define_touch_focus_pressed_hover_and_disabled_states()
     {
         var controls = Load(Path.Combine(ResourcesRoot, "KioskControls.xaml"));

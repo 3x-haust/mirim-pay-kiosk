@@ -51,6 +51,7 @@
     <sys:Double x:Key="KioskSecondaryActionHeight">118</sys:Double>
     <sys:Double x:Key="KioskHeroActionHeight">131</sys:Double>
     <sys:Double x:Key="KioskHeaderHeight">152</sys:Double>
+    <GridLength x:Key="KioskHeaderRowHeight">152</GridLength>
     <sys:Double x:Key="KioskPaymentCardHeight">409</sys:Double>
     <sys:Double x:Key="KioskPaymentCardWidth">442</sys:Double>
     <sys:Double x:Key="KioskSuccessCardWidth">906</sys:Double>

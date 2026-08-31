@@ -5,7 +5,7 @@
              xmlns:sys="clr-namespace:System;assembly=System.Runtime"
              Background="{StaticResource KioskSurfaceBrush}">
     <UserControl.Resources>
-        <sys:Double x:Key="PaymentFooterHeight">443</sys:Double>
+        <GridLength x:Key="PaymentFooterHeight">443</GridLength>
         <sys:Double x:Key="PaymentLogoSize">110</sys:Double>
         <sys:Double x:Key="PaymentIconSize">118</sys:Double>
         <sys:Double x:Key="PaymentSuccessIconSize">280</sys:Double>
@@ -115,7 +115,7 @@
                     </Style>
                 </Grid.Style>
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="{StaticResource KioskHeaderHeight}" />
+                    <RowDefinition Height="{StaticResource KioskHeaderRowHeight}" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="{StaticResource PaymentFooterHeight}" />
                 </Grid.RowDefinitions>
