@@ -1,4 +1,5 @@
 using System.Management.Automation.Language;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
@@ -141,7 +142,8 @@ public sealed class KioskUiQaScriptTests
     [Fact]
     public void Script_asserts_total_order_and_four_portrait_pngs()
     {
-        Assert.Contains("5,000\\uC6D0", Source, StringComparison.Ordinal);
+        Assert.Contains("5000\\uC6D0", Source, StringComparison.Ordinal);
+        Assert.DoesNotContain("5,000\\uC6D0", Source, StringComparison.Ordinal);
         Assert.Contains("Assert-Order", Source, StringComparison.Ordinal);
         Assert.Contains("totalPrice", Source, StringComparison.Ordinal);
         Assert.Contains("paymentMethod", Source, StringComparison.Ordinal);
@@ -151,7 +153,59 @@ public sealed class KioskUiQaScriptTests
             .Select(match => match.Groups[1].Value)
             .ToArray();
         Assert.Equal(new[] { "01-menu.png", "02-cart.png", "03-payment.png", "04-success.png" }, captures);
+        Assert.Equal(4, Regex.Matches(Source, "::Capture\\(\\$window, \\$visualEvidenceDir, \\\"([^\\\"]+\\.png)\\\"").Count);
+        Assert.Contains("figma-visual-fixture", Source, StringComparison.Ordinal);
         Assert.Contains("new Bitmap(1080, 1920", Source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Visual_fixture_payload_is_ascii_and_decodes_exact_products()
+    {
+        var start = Source.IndexOf("Data\\menu.json\"), @'", StringComparison.Ordinal);
+        Assert.True(start >= 0);
+        start += "Data\\menu.json\"), @'".Length;
+        var end = Source.IndexOf("'@)", start, StringComparison.Ordinal);
+        Assert.True(end > start);
+        var payload = Source[start..end];
+        Assert.DoesNotContain(payload, character => character > 127);
+        using var document = JsonDocument.Parse(payload);
+        var items = document.RootElement.EnumerateArray().ToArray();
+        Assert.Equal(3, items.Length);
+        Assert.Equal("오리온 도도한 나쵸 샤워크림어니언", items[0].GetProperty("name").GetString());
+        Assert.Equal("롤리팝 아이스캔디", items[1].GetProperty("name").GetString());
+        Assert.Equal("오리온 더 탱글 미구미", items[2].GetProperty("name").GetString());
+        Assert.All(items, item => Assert.Equal("간식", item.GetProperty("category").GetString()));
+        Assert.Equal(new[] { 1700, 700, 1200 }, items.Select(item => item.GetProperty("price").GetInt32()).ToArray());
+        Assert.All(items, item => Assert.Equal(20, item.GetProperty("stock").GetInt32()));
+    }
+
+    [Fact]
+    public void Visual_fixture_has_exact_items_and_event_first_action_contract()
+    {
+        Assert.Contains("\\uC624\\uB9AC\\uC628", Source, StringComparison.Ordinal);
+        Assert.Contains("\\uB864\\uB9AC\\uD31D", Source, StringComparison.Ordinal);
+        Assert.Contains("\\uAC04\\uC2DD", Source, StringComparison.Ordinal);
+        Assert.Contains("\"price\":1700", Source, StringComparison.Ordinal);
+        Assert.Contains("\"price\":700", Source, StringComparison.Ordinal);
+        Assert.Contains("\"price\":1200", Source, StringComparison.Ordinal);
+        Assert.Contains("AssertVisualCart", Source, StringComparison.Ordinal);
+        var visualCart = ExtractTypeMethod("AssertVisualCart");
+        Assert.Contains("StateReached(window, null, VisualFooterCount", visualCart, StringComparison.Ordinal);
+        Assert.Contains("StateReached(window, null, VisualTotal", visualCart, StringComparison.Ordinal);
+        Assert.Contains("VisualCartCountFour", Source, StringComparison.Ordinal);
+        Assert.Contains("VisualFooterCount = \"4\\uAC1C\"", Source, StringComparison.Ordinal);
+        Assert.Contains("VisualTotal = \"4300\\uC6D0\"", Source, StringComparison.Ordinal);
+        Assert.DoesNotContain("4200\\uC6D0", Source, StringComparison.Ordinal);
+        Assert.DoesNotContain("4,200\\uC6D0", Source, StringComparison.Ordinal);
+        Assert.Contains("count-4-total-4300", Source, StringComparison.Ordinal);
+        Assert.DoesNotContain("total-4200", Source, StringComparison.Ordinal);
+        Assert.DoesNotContain("InvokeAndWait($window, \"BarcodeAddButton\", $null, $null, -1)", Source, StringComparison.Ordinal);
+        AssertInTextOrder(Source, "barcode = \"1\"; expectedCount = [KioskUiQa]::VisualCartCountOne", "barcode = \"2\"; expectedCount = [KioskUiQa]::VisualCartCountTwo", "barcode = \"2\"; expectedCount = [KioskUiQa]::VisualCartCountThree", "barcode = \"3\"; expectedCount = [KioskUiQa]::VisualCartCountFour");
+        AssertInTextOrder(Source, "SetValueAndWait($window, \"BarcodeInput\", $barcode)", "InvokeAndWait($window, \"BarcodeAddButton\", $null, $expectedCount, -1)");
+        AssertInTextOrder(Source, "visualEvidenceDir", "visual-menu", "visual-start-order", "visual-barcode-add", "visual-show-cart", "visual-select-pay", "visual-save-order");
+        Assert.Equal(4, Regex.Matches(Source, "expectedCount = \\[KioskUiQa\\]::VisualCartCount", RegexOptions.CultureInvariant).Count);
+        Assert.Contains("Assert-Order $ordersPath", Source, StringComparison.Ordinal);
+        Assert.Contains("total-5000", Source, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -167,6 +221,20 @@ public sealed class KioskUiQaScriptTests
         Assert.Contains("processAbsent", Source, StringComparison.Ordinal);
         Assert.Contains("tempDirectoryAbsent", Source, StringComparison.Ordinal);
         Assert.Contains("fixtureRestored", Source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Cleanup_sweeps_only_live_kiosk_processes_under_the_qa_temp_root()
+    {
+        Assert.Contains("GetProcessesByName", Source, StringComparison.Ordinal);
+        Assert.Contains("$qaTempRoot", Source, StringComparison.Ordinal);
+        Assert.Contains(".Path", Source, StringComparison.Ordinal);
+        Assert.Contains("Kill()", Source, StringComparison.Ordinal);
+        Assert.Contains("WaitForExit(5000)", Source, StringComparison.Ordinal);
+        Assert.Contains("Dispose()", Source, StringComparison.Ordinal);
+        Assert.Contains("cleanupErrors.Add", Source, StringComparison.Ordinal);
+        AssertInTextOrder(Source, "GetProcessesByName", "trackedPids", "Remove-Item -LiteralPath $qaTempRoot");
+        Assert.Contains("remainingPids = @($trackedPids", Source, StringComparison.Ordinal);
     }
 
     [Fact]

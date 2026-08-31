@@ -55,6 +55,20 @@ public class CartViewModel : INotifyPropertyChanged
         }
     }
 
+    public int TotalQuantity
+    {
+        get
+        {
+            var total = 0;
+            foreach (var item in CartItems)
+            {
+                total = checked(total + item.Quantity);
+            }
+
+            return total;
+        }
+    }
+
     public string Status
     {
         get => _status;
@@ -158,11 +172,16 @@ public class CartViewModel : INotifyPropertyChanged
         }
 
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TotalPrice)));
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TotalQuantity)));
     }
 
     private void OnCartItemPropertyChanged(object? sender, PropertyChangedEventArgs args)
     {
-        if (args.PropertyName == nameof(CartItem.Subtotal))
+        if (args.PropertyName == nameof(CartItem.Quantity))
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TotalQuantity)));
+        }
+        else if (args.PropertyName == nameof(CartItem.Subtotal))
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(TotalPrice)));
         }

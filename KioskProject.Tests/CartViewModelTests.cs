@@ -23,7 +23,7 @@ public sealed partial class CartViewModelTests
         var item = Assert.Single(Items(cart));
         Assert.Equal(2, Read<int>(item, "Quantity"));
         Assert.Equal(5000, Read<int>(cart, "TotalPrice"));
-        Assert.Equal(new[] { "TotalPrice" }, notifications);
+        Assert.Equal(new[] { "TotalPrice", "TotalQuantity" }, notifications);
     }
 
     [Fact]
@@ -41,7 +41,7 @@ public sealed partial class CartViewModelTests
         var item = Assert.Single(Items(cart));
         Assert.Equal(5, Read<int>(item, "Quantity"));
         Assert.Equal(12500, Read<int>(cart, "TotalPrice"));
-        Assert.Equal(new[] { "TotalPrice" }, notifications);
+        Assert.Equal(new[] { "TotalQuantity", "TotalPrice" }, notifications);
     }
 
     [Fact]
@@ -80,7 +80,7 @@ public sealed partial class CartViewModelTests
         // Then
         Assert.Equal(expectedQuantity, Read<int>(item, "Quantity"));
         Assert.Equal(expectedTotal, Read<int>(cart, "TotalPrice"));
-        Assert.Equal(new[] { "TotalPrice" }, notifications);
+        Assert.Equal(new[] { "TotalQuantity", "TotalPrice" }, notifications);
     }
 
     [Theory]
@@ -103,7 +103,7 @@ public sealed partial class CartViewModelTests
         Assert.Empty(Items(cart));
         Assert.Same(collection, Read<object>(cart, "CartItems"));
         Assert.Equal(0, Read<int>(cart, "TotalPrice"));
-        Assert.Equal(new[] { "TotalPrice" }, notifications);
+        Assert.Equal(new[] { "TotalPrice", "TotalQuantity" }, notifications);
     }
 
     [Fact]
@@ -121,7 +121,7 @@ public sealed partial class CartViewModelTests
         // Then
         Assert.Empty(Items(cart));
         Assert.Equal(0, Read<int>(cart, "TotalPrice"));
-        Assert.Equal(new[] { "TotalPrice" }, notifications);
+        Assert.Equal(new[] { "TotalPrice", "TotalQuantity" }, notifications);
     }
 
     [Fact]
@@ -157,10 +157,42 @@ public sealed partial class CartViewModelTests
 
         // Then
         Assert.Same(collection, Read<object>(cart, "CartItems"));
-        Assert.Equal(new[] { "TotalPrice" }, notifications);
+        Assert.Equal(new[] { "TotalPrice", "TotalQuantity" }, notifications);
         notifications.Clear();
         Write(removedItem, "Quantity", 2);
         Assert.Empty(notifications);
+    }
+
+    [Fact]
+    public void TotalQuantity_sums_quantities_across_distinct_lines()
+    {
+        // Given
+        var cart = CreateCart();
+        Invoke(cart, "AddToCart", CreateMenu(1, "Coffee", 2500, 20), 1);
+        Invoke(cart, "AddToCart", CreateMenu(2, "Tea", 3000, 20), 2);
+        Invoke(cart, "AddToCart", CreateMenu(3, "Cake", 4000, 20), 1);
+
+        // When
+        var totalQuantity = Read<int>(cart, "TotalQuantity");
+
+        // Then
+        Assert.Equal(4, totalQuantity);
+        Assert.Equal(3, Items(cart).Count);
+    }
+
+    [Fact]
+    public void TotalQuantity_throws_when_sum_overflows()
+    {
+        // Given
+        var cart = CreateCart();
+        Invoke(cart, "AddToCart", CreateMenu(1, "Coffee", 1, int.MaxValue), int.MaxValue);
+        Invoke(cart, "AddToCart", CreateMenu(2, "Tea", 1, 1), 1);
+
+        // When
+        var exception = Assert.Throws<TargetInvocationException>(() => Read<int>(cart, "TotalQuantity"));
+
+        // Then
+        Assert.IsType<OverflowException>(exception.InnerException);
     }
 
     private static object CreateCart() =>

@@ -129,7 +129,14 @@ public static class KioskUiQa
 {
     public const int UiTimeoutMilliseconds = 15000;
     public const string CartCountOne = "\uC7A5\uBC14\uAD6C\uB2C8 1\uAC1C";
-    public const string ExpectedTotal = "5,000\uC6D0";
+    public const string ExpectedTotal = "5000\uC6D0";
+    public const string VisualCartCountOne = "\uC7A5\uBC14\uAD6C\uB2C8 1\uAC1C";
+    public const string VisualCartCountTwo = "\uC7A5\uBC14\uAD6C\uB2C8 2\uAC1C";
+    public const string VisualCartCountThree = "\uC7A5\uBC14\uAD6C\uB2C8 3\uAC1C";
+    public const string VisualCartCountFour = "\uC7A5\uBC14\uAD6C\uB2C8 4\uAC1C";
+    public const string VisualFooterCount = "4\uAC1C";
+    public const string VisualCartCount = VisualCartCountFour;
+    public const string VisualTotal = "4300\uC6D0";
     private const string LoadError = "\uC0C1\uD488 \uC815\uBCF4\uB97C \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.";
 
     public static void SetValueAndWait(AutomationElement window, string automationId, string value)
@@ -212,6 +219,12 @@ public static class KioskUiQa
     {
         if (!StateReached(window, null, ExpectedTotal, -1))
             throw new InvalidOperationException("The expected order total is not visible.");
+    }
+
+    public static void AssertVisualCart(AutomationElement window)
+    {
+        if (!StateReached(window, null, VisualFooterCount, -1) || !StateReached(window, null, VisualTotal, -1))
+            throw new InvalidOperationException("The visual fixture cart count or total is not visible.");
     }
 
     public static void AssertLoadError(AutomationElement window)
@@ -355,6 +368,22 @@ function Stop-TrackedProcess([Diagnostics.Process]$Process) {
     }
 }
 
+function Sweep-TempKioskProcesses([string]$Root) {
+    foreach ($process in [Diagnostics.Process]::GetProcessesByName("KioskProject")) {
+        try {
+            if ($process.HasExited) { continue }
+            $path = [IO.Path]::GetFullPath($process.Path)
+            $rootPath = [IO.Path]::GetFullPath($Root).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
+            if (-not $path.StartsWith($rootPath, [StringComparison]::OrdinalIgnoreCase)) { continue }
+            if (-not $trackedPids.Contains($process.Id)) { $trackedPids.Add($process.Id) }
+            if (-not $process.HasExited) { $process.Kill() }
+            if (-not $process.WaitForExit(5000)) { throw "Temp-root kiosk process survived bounded kill wait: $($process.Id)" }
+        }
+        catch { $cleanupErrors.Add("Temp-root process cleanup failed: $($_.Exception.Message)") }
+        finally { $process.Dispose() }
+    }
+}
+
 function Assert-Order([string]$OrdersPath) {
     $orders = @((Get-Content -LiteralPath $OrdersPath -Raw | ConvertFrom-Json))
     if ($orders.Count -ne 1) { throw "Expected exactly one saved order." }
@@ -391,11 +420,22 @@ try {
     [IO.Directory]::CreateDirectory($qaTempRoot) | Out-Null
     $happyRoot = Join-Path $qaTempRoot "happy"
     $failureRoot = Join-Path $qaTempRoot "failure"
+    $visualRoot = Join-Path $qaTempRoot "visual"
+    $visualEvidenceDir = Join-Path $EvidenceDir "figma-visual-fixture"
     Copy-Item -LiteralPath $sourceRoot -Destination $happyRoot -Recurse
     Copy-Item -LiteralPath $sourceRoot -Destination $failureRoot -Recurse
+    Copy-Item -LiteralPath $sourceRoot -Destination $visualRoot -Recurse
+    [IO.Directory]::CreateDirectory($visualEvidenceDir) | Out-Null
     [IO.File]::WriteAllText((Join-Path $happyRoot "Data\orders.json"), "[]")
     [IO.File]::WriteAllText((Join-Path $failureRoot "Data\menu.json"), '{"malformed":')
     [IO.File]::WriteAllText((Join-Path $failureRoot "Data\orders.json"), "[]")
+    [IO.File]::WriteAllText((Join-Path $visualRoot "Data\menu.json"), @'
+[
+  {"id":1,"name":"\uC624\uB9AC\uC628 \uB3C4\uB3C4\uD55C \uB098\uCD78 \uC0E4\uC6CC\uD06C\uB9BC\uC5B4\uB2C8\uC5B8","price":1700,"category":"\uAC04\uC2DD","imagePath":"Images/americano.png","stock":20},
+  {"id":2,"name":"\uB864\uB9AC\uD31D \uC544\uC774\uC2A4\uCE94\uB514","price":700,"category":"\uAC04\uC2DD","imagePath":"Images/americano.png","stock":20},
+  {"id":3,"name":"\uC624\uB9AC\uC628 \uB354 \uD0F1\uAE00 \uBBF8\uAD6C\uBBF8","price":1200,"category":"\uAC04\uC2DD","imagePath":"Images/americano.png","stock":20}
+]
+'@)
 
     $happyExe = Join-Path $happyRoot ([IO.Path]::GetFileName($ExePath))
     $happy = Start-KioskProcess $happyExe
@@ -435,6 +475,40 @@ try {
     Add-Action "complete" "MenuStartState"
     Stop-KioskProcess $happy
 
+    $visualExe = Join-Path $visualRoot ([IO.Path]::GetFileName($ExePath))
+    $visual = Start-KioskProcess $visualExe
+    $window = $visual.Window
+    [KioskUiQa]::AssertVisible($window, "OrderButton")
+    [KioskUiQa]::Capture($window, $visualEvidenceDir, "01-menu.png")
+    Add-Action "visual-menu" "01-menu.png"
+    [KioskUiQa]::InvokeAndWait($window, "OrderButton", "BarcodeInput", $null, -1)
+    Add-Action "visual-start-order" "MenuCatalogState"
+    foreach ($step in @(
+        @{ barcode = "1"; expectedCount = [KioskUiQa]::VisualCartCountOne },
+        @{ barcode = "2"; expectedCount = [KioskUiQa]::VisualCartCountTwo },
+        @{ barcode = "2"; expectedCount = [KioskUiQa]::VisualCartCountThree },
+        @{ barcode = "3"; expectedCount = [KioskUiQa]::VisualCartCountFour }
+    )) {
+        $barcode = $step.barcode
+        $expectedCount = $step.expectedCount
+        [KioskUiQa]::SetValueAndWait($window, "BarcodeInput", $barcode)
+        [KioskUiQa]::InvokeAndWait($window, "BarcodeAddButton", $null, $expectedCount, -1)
+        Add-Action "visual-barcode-add" "$barcode-$expectedCount"
+    }
+    [KioskUiQa]::InvokeAndWait($window, "CartButton", "IncreaseButton", $null, -1)
+    [KioskUiQa]::AssertVisualCart($window)
+    [KioskUiQa]::Capture($window, $visualEvidenceDir, "02-cart.png")
+    Add-Action "visual-show-cart" "count-4-total-4300"
+    [KioskUiQa]::InvokeAndWait($window, "PaymentButton", "PayPaymentButton", $null, -1)
+    [KioskUiQa]::InvokeAndWait($window, "PayPaymentButton", "NextButton", $null, 1)
+    [KioskUiQa]::Capture($window, $visualEvidenceDir, "03-payment.png")
+    Add-Action "visual-select-pay" "03-payment.png"
+    [KioskUiQa]::InvokeAndWait($window, "NextButton", "CompleteButton", $null, -1)
+    [KioskUiQa]::Capture($window, $visualEvidenceDir, "04-success.png")
+    Add-Action "visual-save-order" "04-success.png-total-4300"
+    [KioskUiQa]::InvokeAndWait($window, "CompleteButton", "OrderButton", $null, -1)
+    Stop-KioskProcess $visual
+
     $failureExe = Join-Path $failureRoot ([IO.Path]::GetFileName($ExePath))
     $malformed = Start-KioskProcess $failureExe
     $window = $malformed.Window
@@ -455,6 +529,7 @@ finally {
     foreach ($process in $trackedProcesses) {
         try { Stop-TrackedProcess $process } catch { $cleanupErrors.Add($_.Exception.Message) }
     }
+    Sweep-TempKioskProcesses $qaTempRoot
     try {
         if (Test-Path -LiteralPath $qaTempRoot) {
             Remove-Item -LiteralPath $qaTempRoot -Recurse -Force

@@ -5,7 +5,6 @@
              xmlns:sys="clr-namespace:System;assembly=System.Runtime"
              Background="{StaticResource KioskSurfaceBrush}">
     <UserControl.Resources>
-        <GridLength x:Key="CartFooterHeight">443</GridLength>
         <sys:Double x:Key="CartItemMinHeight">176</sys:Double>
         <sys:Double x:Key="CartLogoSize">110</sys:Double>
         <sys:Double x:Key="CartQuantityButtonSize">96</sys:Double>
@@ -68,15 +67,18 @@
             </Grid>
 
             <ScrollViewer Grid.Row="2"
-                          Margin="{StaticResource CartListSpacing}"
+                          Width="{StaticResource CartListWidth}"
+                          Margin="37,0,0,0"
+                          HorizontalAlignment="Left"
                           HorizontalScrollBarVisibility="Disabled"
                           VerticalScrollBarVisibility="Auto">
                 <ItemsControl ItemsSource="{Binding Cart.CartItems}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Grid MinHeight="{StaticResource CartItemMinHeight}"
-                                  Margin="{StaticResource CartItemSpacing}">
-                                <Border Style="{StaticResource KioskCardStyle}">
+                            <Grid Height="{StaticResource CartItemHeight}"
+                                  Margin="{StaticResource CartItemGap}">
+                                <Border Tag="{StaticResource KioskCardRadius}"
+                                        Style="{StaticResource KioskCardStyle}">
                                     <Grid>
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="*" />
@@ -108,14 +110,19 @@
                                                     Command="{Binding DataContext.Cart.DecreaseCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                     CommandParameter="{Binding}"
                                                     Style="{StaticResource CartIconButtonStyle}">
-                                                <Path Width="24"
-                                                      Height="24"
-                                                      Data="{StaticResource KioskMinusGeometry}"
-                                                      Stroke="{StaticResource KioskTextOnPrimaryBrush}"
-                                                      StrokeThickness="{StaticResource KioskIconStroke}"
-                                                      Stretch="Uniform" />
+                                                <Border Width="{StaticResource CartQuantityVisualSize}"
+                                                        Height="{StaticResource CartQuantityVisualSize}"
+                                                        Background="{StaticResource KioskDisabledBrush}"
+                                                        CornerRadius="{StaticResource CartQuantityVisualRadius}">
+                                                    <Path Width="24" Height="24"
+                                                          Data="{StaticResource KioskMinusGeometry}"
+                                                          Stroke="{StaticResource KioskTextBrush}"
+                                                          StrokeThickness="{StaticResource KioskIconStroke}"
+                                                          Stretch="Uniform" />
+                                                </Border>
                                             </Button>
-                                            <TextBlock MinWidth="72"
+                                            <TextBlock MinWidth="{StaticResource CartQuantityVisualSize}"
+                                                       FontSize="{StaticResource KioskTypeAction}"
                                                        HorizontalAlignment="Center"
                                                        VerticalAlignment="Center"
                                                        TextAlignment="Center"
@@ -126,12 +133,16 @@
                                                     Command="{Binding DataContext.Cart.IncreaseCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                                     CommandParameter="{Binding}"
                                                     Style="{StaticResource CartIconButtonStyle}">
-                                                <Path Width="24"
-                                                      Height="24"
-                                                      Data="{StaticResource KioskPlusGeometry}"
-                                                      Stroke="{StaticResource KioskTextOnPrimaryBrush}"
-                                                      StrokeThickness="{StaticResource KioskIconStroke}"
-                                                      Stretch="Uniform" />
+                                                <Border Width="{StaticResource CartQuantityVisualSize}"
+                                                        Height="{StaticResource CartQuantityVisualSize}"
+                                                        Background="{StaticResource KioskPrimaryBrush}"
+                                                        CornerRadius="{StaticResource CartQuantityVisualRadius}">
+                                                    <Path Width="24" Height="24"
+                                                          Data="{StaticResource KioskPlusGeometry}"
+                                                          Stroke="{StaticResource KioskTextOnPrimaryBrush}"
+                                                          StrokeThickness="{StaticResource KioskIconStroke}"
+                                                          Stretch="Uniform" />
+                                                </Border>
                                             </Button>
                                         </StackPanel>
                                     </Grid>
@@ -146,12 +157,16 @@
                                         Command="{Binding DataContext.Cart.RemoveCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                         CommandParameter="{Binding}"
                                         Style="{StaticResource KioskSecondaryButtonStyle}">
-                                    <Path Width="24"
-                                          Height="24"
-                                          Data="{StaticResource KioskRemoveGeometry}"
-                                          Stroke="{StaticResource KioskTextBrush}"
-                                          StrokeThickness="{StaticResource KioskIconStroke}"
-                                          Stretch="Uniform" />
+                                    <Border Width="{StaticResource CartQuantityVisualSize}"
+                                            Height="{StaticResource CartQuantityVisualSize}"
+                                            Background="{StaticResource KioskDisabledBrush}"
+                                            CornerRadius="{StaticResource CartQuantityVisualRadius}">
+                                        <Path Width="24" Height="24"
+                                              Data="{StaticResource KioskRemoveGeometry}"
+                                              Stroke="{StaticResource KioskTextBrush}"
+                                              StrokeThickness="{StaticResource KioskIconStroke}"
+                                              Stretch="Uniform" />
+                                    </Border>
                                 </Button>
                             </Grid>
                         </DataTemplate>
@@ -185,7 +200,7 @@
                     Background="{StaticResource KioskSurfaceBrush}"
                     BorderBrush="{StaticResource KioskTextBrush}"
                     BorderThickness="0,1,0,0"
-                    Padding="{StaticResource KioskSpacePage}">
+                    Padding="{StaticResource CartFooterInset}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -197,14 +212,16 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Foreground="{StaticResource KioskTextSecondaryBrush}"
+                        <TextBlock FontSize="{StaticResource KioskTypeBodyLarge}"
+                                   Foreground="{StaticResource KioskTextSecondaryBrush}"
                                    Style="{StaticResource KioskTextStyle}"
                                    Text="주문개수"
                                    TextWrapping="Wrap" />
                         <TextBlock Grid.Column="1"
+                                   FontSize="{StaticResource KioskTypeBodyLarge}"
                                    Foreground="{StaticResource KioskTextSecondaryBrush}"
                                    Style="{StaticResource KioskTextStyle}"
-                                   Text="{Binding Cart.CartItems.Count, StringFormat={}{0}개}"
+                                   Text="{Binding Cart.TotalQuantity, StringFormat={}{0}개}"
                                    TextWrapping="Wrap" />
                     </Grid>
                     <Grid Grid.Row="1" Margin="0,28,0,0">
@@ -212,17 +229,21 @@
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Style="{StaticResource KioskTotalTextStyle}"
+                        <TextBlock FontSize="{StaticResource KioskTypeTitle}"
+                                   Foreground="{StaticResource KioskTotalLabelBrush}"
+                                   Style="{StaticResource KioskTotalTextStyle}"
                                    Text="총 결제금액"
                                    TextWrapping="Wrap" />
                         <TextBlock Grid.Column="1"
+                                   FontSize="{StaticResource KioskTypeTitle}"
                                    Style="{StaticResource KioskTotalTextStyle}"
-                                   Text="{Binding Cart.TotalPrice, StringFormat={}{0:N0}원}"
+                                   Text="{Binding Cart.TotalPrice, StringFormat={}{0}원}"
                                    TextWrapping="Wrap" />
                     </Grid>
                     <Button Grid.Row="2"
                             automation:AutomationProperties.AutomationId="PaymentButton"
-                            MinWidth="320"
+                            Width="{StaticResource CartPaymentButtonWidth}"
+                            Height="{StaticResource KioskActionHeight}"
                             Margin="0,44,0,0"
                             HorizontalAlignment="Right"
                             VerticalAlignment="Bottom"

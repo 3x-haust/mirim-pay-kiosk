@@ -84,7 +84,7 @@ public sealed class KioskViewXamlTests
         var source = Source("MenuView.xaml");
         AssertBindingPaths(source,
             "IsStartScreen", "Menu.IsEmpty", "Menu.HasLoadError", "Menu.Categories", "Menu.SelectedCategory", "Menu.FilteredMenus",
-            "Menu.BarcodeInput", "Menu.ScanBarcodeCommand", "DataContext.Menu.AddCommand", "Menu.Status", "Cart.CartItems.Count",
+            "Menu.BarcodeInput", "Menu.ScanBarcodeCommand", "DataContext.Menu.AddCommand", "Menu.Status", "Cart.TotalQuantity",
             "StartOrderCommand", "ShowCartCommand");
 
         Assert.Contains("CommandParameter=\"{Binding}\"", source, StringComparison.Ordinal);
@@ -97,9 +97,11 @@ public sealed class KioskViewXamlTests
         var source = Source("CartView.xaml");
         AssertBindingPaths(source,
             "Cart.CartItems", "Menu.Name", "Menu.Price", "Quantity", "Subtotal", "DataContext.Cart.RemoveCommand",
-            "DataContext.Cart.DecreaseCommand", "DataContext.Cart.IncreaseCommand", "Cart.CartItems.Count", "Cart.TotalPrice", "ShowPaymentCommand");
+            "DataContext.Cart.DecreaseCommand", "DataContext.Cart.IncreaseCommand", "Cart.TotalQuantity", "Cart.TotalPrice", "ShowPaymentCommand");
 
         Assert.True(Regex.Matches(source, "CommandParameter=\\\"{Binding}\\\"").Count >= 3);
+        Assert.Contains("Text=\"{Binding Cart.TotalPrice, StringFormat={}{0}원}\"", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("Cart.TotalPrice, StringFormat={}{0:N0}원", source, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -107,11 +109,13 @@ public sealed class KioskViewXamlTests
     {
         var source = Source("PaymentView.xaml");
         AssertBindingPaths(source,
-            "IsPaymentSuccessful", "PaymentError", "SelectedPaymentMethod", "Cart.CartItems.Count", "Cart.TotalPrice",
+            "IsPaymentSuccessful", "PaymentError", "SelectedPaymentMethod", "Cart.TotalQuantity", "Cart.TotalPrice",
             "SelectPaymentMethodCommand", "BackToCartCommand", "CompletePaymentCommand", "AcknowledgePaymentCommand");
 
         Assert.Contains("CommandParameter=\"Pay\"", source, StringComparison.Ordinal);
         Assert.Contains("CommandParameter=\"Face\"", source, StringComparison.Ordinal);
+        Assert.Contains("Text=\"{Binding Cart.TotalPrice, StringFormat={}{0}원}\"", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("Cart.TotalPrice, StringFormat={}{0:N0}원", source, StringComparison.Ordinal);
     }
 
     [Fact]

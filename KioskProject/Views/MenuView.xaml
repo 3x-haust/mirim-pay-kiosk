@@ -36,16 +36,52 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="223" />
                 </Grid.RowDefinitions>
-                <TextBlock Margin="162,190,0,0"
-                           HorizontalAlignment="Left"
-                           VerticalAlignment="Top"
-                           FontFamily="{StaticResource KioskBrandFontFamily}"
-                           FontSize="{StaticResource KioskTypeBrand}"
-                           FontWeight="Black"
-                           Foreground="{StaticResource KioskTextOnPrimaryBrush}"
-                           LineHeight="110"
-                           Text="MIRIM&#x0a;PAY"
-                           TextWrapping="Wrap" />
+                <Canvas Width="1080"
+                        Height="1920"
+                        HorizontalAlignment="Left"
+                        VerticalAlignment="Top"
+                        IsHitTestVisible="True">
+                    <TextBlock Canvas.Left="0"
+                               Canvas.Top="0"
+                               Width="302"
+                               Height="238"
+                               Margin="162,199,0,0"
+                               FontFamily="{StaticResource KioskBrandFontFamily}"
+                               FontSize="{StaticResource KioskTypeBrand}"
+                               FontWeight="Black"
+                               Foreground="{StaticResource KioskTextOnPrimaryBrush}"
+                               Text="MIRIM&#x0a;PAY"
+                               TextWrapping="Wrap" />
+                    <Line X1="0" Y1="142" X2="1125" Y2="142"
+                          Stroke="{StaticResource KioskTextOnPrimaryBrush}"
+                          StrokeThickness="1"
+                          IsHitTestVisible="False" />
+                    <Line X1="101" Y1="0" X2="101" Y2="1920"
+                          Stroke="{StaticResource KioskTextOnPrimaryBrush}"
+                          StrokeThickness="2"
+                          IsHitTestVisible="False" />
+                    <Line X1="0" Y1="914" X2="100" Y2="914"
+                          Stroke="{StaticResource KioskTextOnPrimaryBrush}"
+                          StrokeThickness="2"
+                          IsHitTestVisible="False" />
+                    <Line X1="0" Y1="1408" X2="101" Y2="1408"
+                          Stroke="{StaticResource KioskTextOnPrimaryBrush}"
+                          StrokeThickness="2"
+                          IsHitTestVisible="False" />
+                    <Button automation:AutomationProperties.AutomationId="OrderButton"
+                            Canvas.Left="{StaticResource OrderButtonX}"
+                            Canvas.Top="{StaticResource OrderButtonY}"
+                            Width="418"
+                            Height="{StaticResource KioskHeroActionHeight}"
+                            BorderThickness="{StaticResource KioskBorderOutline}"
+                            FontSize="{StaticResource KioskStartActionType}"
+                            FontWeight="{StaticResource KioskStartActionWeight}"
+                            Tag="{StaticResource KioskPillRadius}"
+                            IsEnabled="{Binding Menu.CanPurchase}"
+                            Command="{Binding StartOrderCommand}"
+                            Content="주문하기"
+                            Style="{StaticResource KioskOutlineButtonStyle}" />
+                </Canvas>
                 <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                     <TextBlock Foreground="{StaticResource KioskTextOnPrimaryBrush}"
                                Text="이용 가능한 상품이 없습니다."
@@ -78,13 +114,7 @@
                         </TextBlock.Style>
                     </TextBlock>
                 </StackPanel>
-                <Button Grid.Row="1"
-                        automation:AutomationProperties.AutomationId="OrderButton"
-                        Width="418"
-                        IsEnabled="{Binding Menu.CanPurchase}"
-                        Command="{Binding StartOrderCommand}"
-                        Content="주문하기"
-                        Style="{StaticResource KioskOutlineButtonStyle}" />
+
             </Grid>
 
             <Grid x:Name="CatalogState"
@@ -273,7 +303,7 @@
                         </Grid.ColumnDefinitions>
                         <TextBlock VerticalAlignment="Center"
                                    Style="{StaticResource KioskTextStyle}"
-                                   Text="{Binding Cart.CartItems.Count, StringFormat=장바구니 {0}개}"
+                                   Text="{Binding Cart.TotalQuantity, StringFormat=장바구니 {0}개}"
                                    TextWrapping="Wrap" />
                         <Button Grid.Column="1"
                                 automation:AutomationProperties.AutomationId="CartButton"

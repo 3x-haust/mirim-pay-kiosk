@@ -13,6 +13,7 @@
     <Color x:Key="KioskControlBorderColor">#FFCECECE</Color>
     <Color x:Key="KioskDisabledColor">#FFD0D0D0</Color>
     <Color x:Key="KioskFocusColor">#FF111111</Color>
+    <Color x:Key="KioskTotalLabelColor">#FF008C0E</Color>
 
     <SolidColorBrush x:Key="KioskPrimaryBrush" Color="{StaticResource KioskPrimaryColor}" />
     <SolidColorBrush x:Key="KioskPrimaryStrongBrush" Color="{StaticResource KioskPrimaryStrongColor}" />
@@ -26,6 +27,7 @@
     <SolidColorBrush x:Key="KioskControlBorderBrush" Color="{StaticResource KioskControlBorderColor}" />
     <SolidColorBrush x:Key="KioskDisabledBrush" Color="{StaticResource KioskDisabledColor}" />
     <SolidColorBrush x:Key="KioskFocusBrush" Color="{StaticResource KioskFocusColor}" />
+    <SolidColorBrush x:Key="KioskTotalLabelBrush" Color="{StaticResource KioskTotalLabelColor}" />
 
     <FontFamily x:Key="KioskFontFamily">Pretendard, Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo</FontFamily>
     <FontFamily x:Key="KioskBrandFontFamily">Pretendard, Noto Sans KR, Malgun Gothic, Apple SD Gothic Neo</FontFamily>
@@ -35,6 +37,7 @@
     <sys:Double x:Key="KioskTypeTitle">48</sys:Double>
     <sys:Double x:Key="KioskTypeAction">40</sys:Double>
     <sys:Double x:Key="KioskStartActionType">45</sys:Double>
+    <FontWeight x:Key="KioskStartActionWeight">SemiBold</FontWeight>
     <sys:Double x:Key="KioskTypeBodyLarge">36</sys:Double>
     <sys:Double x:Key="KioskTypeBody">32</sys:Double>
     <sys:Double x:Key="KioskTypeLabel">30</sys:Double>
@@ -55,7 +58,38 @@
     <sys:Double x:Key="KioskPaymentCardHeight">409</sys:Double>
     <sys:Double x:Key="KioskPaymentCardWidth">442</sys:Double>
     <sys:Double x:Key="KioskSuccessCardWidth">906</sys:Double>
-    <sys:Double x:Key="KioskSuccessCardHeight">1718</sys:Double>
+    <sys:Double x:Key="KioskSuccessCardHeight">1718.2609</sys:Double>
+
+    <sys:Double x:Key="OrderButtonX">384</sys:Double>
+    <sys:Double x:Key="OrderButtonY">1566</sys:Double>
+    <sys:Double x:Key="CartListWidth">1015</sys:Double>
+    <sys:Double x:Key="CartItemHeight">164</sys:Double>
+    <sys:Double x:Key="CartQuantityVisualSize">50</sys:Double>
+    <sys:Double x:Key="CartPaymentButtonWidth">304</sys:Double>
+    <GridLength x:Key="CartFooterHeight">443</GridLength>
+    <sys:Double x:Key="PaymentCardPayX">66</sys:Double>
+    <sys:Double x:Key="PaymentPayCardWidth">450</sys:Double>
+    <sys:Double x:Key="PaymentCardFaceX">585</sys:Double>
+    <sys:Double x:Key="PaymentFaceCardWidth">430</sys:Double>
+    <sys:Double x:Key="PaymentPayIconWidth">110</sys:Double>
+    <sys:Double x:Key="PaymentPayIconHeight">110</sys:Double>
+    <sys:Double x:Key="PaymentFaceIconWidth">110</sys:Double>
+    <sys:Double x:Key="PaymentFaceIconHeight">115</sys:Double>
+    <sys:Double x:Key="PaymentFooterButtonWidth">489</sys:Double>
+    <sys:Double x:Key="KioskSuccessCardX">87</sys:Double>
+    <sys:Double x:Key="KioskSuccessCardY">100</sys:Double>
+    <sys:Double x:Key="PaymentSuccessIconX">313</sys:Double>
+    <sys:Double x:Key="PaymentSuccessIconY">300</sys:Double>
+    <sys:Double x:Key="PaymentSuccessIconWidth">280</sys:Double>
+    <sys:Double x:Key="PaymentSuccessIconHeight">278.2609</sys:Double>
+    <sys:Double x:Key="PaymentSuccessMessageX">163</sys:Double>
+    <sys:Double x:Key="PaymentSuccessMessageY">728.2609</sys:Double>
+    <sys:Double x:Key="PaymentSuccessMessageWidth">580</sys:Double>
+    <sys:Double x:Key="PaymentSuccessMessageHeight">132</sys:Double>
+    <sys:Double x:Key="PaymentSuccessMessageType">50</sys:Double>
+    <sys:Double x:Key="CompleteButtonX">245.5</sys:Double>
+    <sys:Double x:Key="CompleteButtonY">1360.2609</sys:Double>
+    <sys:Double x:Key="CompleteButtonWidth">415</sys:Double>
 
     <Thickness x:Key="KioskBorderNone">0</Thickness>
     <Thickness x:Key="KioskBorderHairlineBottom">0,0,0,1</Thickness>
@@ -67,10 +101,14 @@
     <Thickness x:Key="KioskFocusThickness">4</Thickness>
     <Thickness x:Key="KioskCardBorderThickness">3</Thickness>
     <Thickness x:Key="KioskPaymentCardBorderThickness">4</Thickness>
+    <Thickness x:Key="CartItemGap">0,0,0,26</Thickness>
+    <Thickness x:Key="CartFooterInset">85,43,85,0</Thickness>
+    <Thickness x:Key="PaymentFooterInset">85,43,85,0</Thickness>
 
     <CornerRadius x:Key="KioskActionRadius">33</CornerRadius>
     <CornerRadius x:Key="KioskCardRadius">46</CornerRadius>
     <CornerRadius x:Key="KioskPaymentCardRadius">50</CornerRadius>
     <CornerRadius x:Key="KioskSuccessCardRadius">59</CornerRadius>
     <CornerRadius x:Key="KioskPillRadius">86</CornerRadius>
+    <CornerRadius x:Key="CartQuantityVisualRadius">25</CornerRadius>
 </ResourceDictionary>

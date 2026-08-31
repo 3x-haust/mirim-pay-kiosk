@@ -9,7 +9,6 @@
         <sys:Double x:Key="PaymentLogoSize">110</sys:Double>
         <sys:Double x:Key="PaymentIconSize">118</sys:Double>
         <sys:Double x:Key="PaymentSuccessIconSize">280</sys:Double>
-        <sys:Double x:Key="PaymentSuccessMessageType">50</sys:Double>
         <Thickness x:Key="PaymentTitleSpacing">75,82,75,0</Thickness>
         <Thickness x:Key="PaymentChoiceSpacing">18</Thickness>
 
@@ -170,10 +169,13 @@
                         </Border>
                     </StackPanel>
 
-                    <StackPanel HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Orientation="Horizontal">
-                        <Button automation:AutomationProperties.AutomationId="PayPaymentButton"
+                    <Canvas>
+                        <Button Canvas.Left="{StaticResource PaymentCardPayX}"
+                                Canvas.Top="530"
+                                Width="{StaticResource PaymentPayCardWidth}"
+                                Height="{StaticResource KioskPaymentCardHeight}"
+                                Margin="0"
+                                automation:AutomationProperties.AutomationId="PayPaymentButton"
                                 Command="{Binding SelectPaymentMethodCommand}"
                                 CommandParameter="Pay">
                             <Button.Style>
@@ -188,8 +190,8 @@
                                 </Style>
                             </Button.Style>
                             <StackPanel HorizontalAlignment="Center">
-                                <Image Width="{StaticResource PaymentIconSize}"
-                                       Height="{StaticResource PaymentIconSize}"
+                                <Image Width="{StaticResource PaymentPayIconWidth}"
+                                       Height="{StaticResource PaymentPayIconHeight}"
                                        Source="{StaticResource KioskPayIcon}"
                                        Stretch="Uniform" />
                                 <TextBlock Margin="0,100,0,0"
@@ -202,7 +204,12 @@
                             </StackPanel>
                         </Button>
 
-                        <Button automation:AutomationProperties.AutomationId="FacePaymentButton"
+                        <Button Canvas.Left="{StaticResource PaymentCardFaceX}"
+                                Canvas.Top="530"
+                                Width="{StaticResource PaymentFaceCardWidth}"
+                                Height="{StaticResource KioskPaymentCardHeight}"
+                                Margin="0"
+                                automation:AutomationProperties.AutomationId="FacePaymentButton"
                                 Command="{Binding SelectPaymentMethodCommand}"
                                 CommandParameter="Face">
                             <Button.Style>
@@ -217,8 +224,8 @@
                                 </Style>
                             </Button.Style>
                             <StackPanel HorizontalAlignment="Center">
-                                <Image Width="{StaticResource PaymentIconSize}"
-                                       Height="{StaticResource PaymentIconSize}"
+                                <Image Width="{StaticResource PaymentFaceIconWidth}"
+                                       Height="{StaticResource PaymentFaceIconHeight}"
                                        Source="{StaticResource KioskFaceIcon}"
                                        Stretch="Uniform" />
                                 <TextBlock Margin="0,100,0,0"
@@ -230,14 +237,14 @@
                                            TextWrapping="Wrap" />
                             </StackPanel>
                         </Button>
-                    </StackPanel>
+                    </Canvas>
                 </Grid>
 
                 <Border Grid.Row="2"
                         Background="{StaticResource KioskSurfaceBrush}"
                         BorderBrush="{StaticResource KioskTextBrush}"
                         BorderThickness="0,1,0,0"
-                        Padding="{StaticResource KioskSpacePage}">
+                        Padding="{StaticResource PaymentFooterInset}">
                     <Grid>
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto" />
@@ -256,7 +263,7 @@
                             <TextBlock Grid.Column="1"
                                        Foreground="{StaticResource KioskTextSecondaryBrush}"
                                        Style="{StaticResource KioskTextStyle}"
-                                       Text="{Binding Cart.CartItems.Count, StringFormat={}{0}개}"
+                                       Text="{Binding Cart.TotalQuantity, StringFormat={}{0}개}"
                                        TextWrapping="Wrap" />
                         </Grid>
                         <Grid Grid.Row="1" Margin="0,28,0,0">
@@ -269,7 +276,7 @@
                                        TextWrapping="Wrap" />
                             <TextBlock Grid.Column="1"
                                        Style="{StaticResource KioskTotalTextStyle}"
-                                       Text="{Binding Cart.TotalPrice, StringFormat={}{0:N0}원}"
+                                       Text="{Binding Cart.TotalPrice, StringFormat={}{0}원}"
                                        TextWrapping="Wrap" />
                         </Grid>
                         <Grid Grid.Row="2" Margin="0,44,0,0">
@@ -281,11 +288,13 @@
                             <Button automation:AutomationProperties.AutomationId="BackButton"
                                     Command="{Binding BackToCartCommand}"
                                     Content="이전"
+                                    Width="{StaticResource PaymentFooterButtonWidth}"
                                     Style="{StaticResource KioskSecondaryButtonStyle}" />
                             <Button Grid.Column="2"
                                     automation:AutomationProperties.AutomationId="NextButton"
                                     Command="{Binding CompletePaymentCommand}"
                                     Content="다음"
+                                    Width="{StaticResource PaymentFooterButtonWidth}"
                                     Style="{StaticResource KioskPrimaryButtonStyle}" />
                         </Grid>
                     </Grid>
@@ -305,42 +314,39 @@
                         </Style.Triggers>
                     </Style>
                 </Grid.Style>
-                <Border HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
+                <Border Canvas.Left="{StaticResource KioskSuccessCardX}"
+                        Canvas.Top="{StaticResource KioskSuccessCardY}"
+                        Width="{StaticResource KioskSuccessCardWidth}"
+                        Height="{StaticResource KioskSuccessCardHeight}"
+                        Tag="{StaticResource KioskSuccessCardRadius}"
                         Style="{StaticResource KioskSuccessCardStyle}">
-                    <Grid Margin="120,250">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="Auto" />
-                            <RowDefinition Height="*" />
-                        </Grid.RowDefinitions>
-                        <StackPanel HorizontalAlignment="Center"
-                                    VerticalAlignment="Bottom">
-                            <Image Width="{StaticResource PaymentSuccessIconSize}"
-                                   Height="{StaticResource PaymentSuccessIconSize}"
-                                   Source="{StaticResource KioskSuccessIcon}"
-                                   Stretch="Uniform" />
-                            <TextBlock Width="580"
-                                       Margin="0,150,0,0"
-                                       FontFamily="{StaticResource KioskFontFamily}"
-                                       FontSize="{StaticResource PaymentSuccessMessageType}"
-                                       FontWeight="Medium"
-                                       Foreground="{StaticResource KioskBlackBrush}"
-                                       LineHeight="66"
-                                       Text="결제가 성공적으로&#x0a;완료되었습니다!"
-                                       TextAlignment="Center"
-                                       TextWrapping="Wrap" />
-                        </StackPanel>
-                        <Button Grid.Row="2"
+                    <Canvas>
+                        <Image Canvas.Left="{StaticResource PaymentSuccessIconX}"
+                               Canvas.Top="{StaticResource PaymentSuccessIconY}"
+                               Width="{StaticResource PaymentSuccessIconWidth}"
+                               Height="{StaticResource PaymentSuccessIconHeight}"
+                               Source="{StaticResource KioskSuccessIcon}"
+                               Stretch="Uniform" />
+                        <TextBlock Canvas.Left="{StaticResource PaymentSuccessMessageX}"
+                                   Canvas.Top="{StaticResource PaymentSuccessMessageY}"
+                                   Width="{StaticResource PaymentSuccessMessageWidth}"
+                                   Height="{StaticResource PaymentSuccessMessageHeight}"
+                                   FontFamily="{StaticResource KioskFontFamily}"
+                                   FontSize="{StaticResource PaymentSuccessMessageType}"
+                                   FontWeight="Medium"
+                                   Foreground="{StaticResource KioskBlackBrush}"
+                                   LineHeight="66"
+                                   Text="결제가 성공적으로&#x0a;완료되었습니다!"
+                                   TextAlignment="Center"
+                                   TextWrapping="Wrap" />
+                        <Button Canvas.Left="{StaticResource CompleteButtonX}"
+                                Canvas.Top="{StaticResource CompleteButtonY}"
+                                Width="{StaticResource CompleteButtonWidth}"
                                 automation:AutomationProperties.AutomationId="CompleteButton"
-                                MinWidth="415"
-                                Margin="0,0,0,20"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Bottom"
                                 Command="{Binding AcknowledgePaymentCommand}"
                                 Content="MIRIM PAY"
                                 Style="{StaticResource SuccessAcknowledgeButtonStyle}" />
-                    </Grid>
+                    </Canvas>
                 </Border>
             </Grid>
         </Grid>

@@ -153,6 +153,32 @@ public sealed class KioskVisualResourceTests
     }
 
     [Fact]
+    public void CornerRadius_consumers_only_use_compatible_static_resources()
+    {
+        // Given
+        var paths = Directory.GetFiles(ProjectRoot, "*.xaml", SearchOption.AllDirectories)
+            .Where(path => !path.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal) &&
+                           !path.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
+            .ToArray();
+        var resourceTypes = paths.SelectMany(path => Load(path).Descendants())
+            .Where(element => element.Attribute(Xaml + "Key") is not null)
+            .ToDictionary(element => (string)element.Attribute(Xaml + "Key")!, element => element.Name.LocalName, StringComparer.Ordinal);
+
+        // When
+        var violations = paths.SelectMany(path => Load(path).Descendants()
+                .Where(element => element.Attribute("CornerRadius") is not null)
+                .Select(element => new { path, Value = (string)element.Attribute("CornerRadius")! }))
+            .Select(candidate => new { candidate.path, Match = Regex.Match(candidate.Value, @"^\{StaticResource\s+([^}\s,]+)\}$") })
+            .Where(candidate => candidate.Match.Success && resourceTypes.TryGetValue(candidate.Match.Groups[1].Value, out var type) && type != "CornerRadius")
+            .Select(candidate => $"{Path.GetRelativePath(ProjectRoot, candidate.path)}:CornerRadius -> {candidate.Match.Groups[1].Value} ({resourceTypes[candidate.Match.Groups[1].Value]})")
+            .Order(StringComparer.Ordinal)
+            .ToArray();
+
+        // Then
+        Assert.True(violations.Length == 0, $"CornerRadius StaticResources must declare CornerRadius objects: {string.Join(", ", violations)}");
+    }
+
+    [Fact]
     public void Image_sources_only_consume_image_source_static_resources()
     {
         // Given
