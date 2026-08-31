@@ -41,7 +41,7 @@
                        Height="{StaticResource CartLogoSize}"
                        Margin="26,0,0,0"
                        HorizontalAlignment="Left"
-                       Source="{StaticResource KioskLogoAssetPath}"
+                       Source="{StaticResource KioskLogoImage}"
                        Stretch="Uniform" />
             </Border>
 

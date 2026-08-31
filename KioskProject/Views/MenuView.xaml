@@ -112,7 +112,7 @@
                            Height="{StaticResource MenuLogoSize}"
                            Margin="26,0,0,0"
                            HorizontalAlignment="Left"
-                           Source="{StaticResource KioskLogoAssetPath}"
+                           Source="{StaticResource KioskLogoImage}"
                            Stretch="Uniform" />
                 </Border>
 
@@ -214,7 +214,7 @@
                                             <RowDefinition Height="*" />
                                             <RowDefinition Height="Auto" />
                                         </Grid.RowDefinitions>
-                                        <Image Source="{Binding ImagePath, FallbackValue={StaticResource KioskMenuPlaceholderAssetPath}}"
+                                        <Image Source="{Binding ImagePath, FallbackValue={StaticResource KioskMenuPlaceholderImage}}"
                                                Stretch="Uniform" />
                                         <StackPanel Grid.Row="1" Margin="0,20,0,10">
                                             <TextBlock Style="{StaticResource KioskTextStyle}"

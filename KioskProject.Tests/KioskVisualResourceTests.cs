@@ -153,6 +153,43 @@ public sealed class KioskVisualResourceTests
     }
 
     [Fact]
+    public void Image_sources_only_consume_image_source_static_resources()
+    {
+        // Given
+        var paths = Directory.GetFiles(ProjectRoot, "*.xaml", SearchOption.AllDirectories)
+            .Where(path => !path.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal) &&
+                           !path.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
+            .ToArray();
+        var documents = paths.Select(path => (Path: path, Document: Load(path))).ToArray();
+        var resourceTypes = documents.SelectMany(source => source.Document.Descendants())
+            .Where(element => element.Attribute(Xaml + "Key") is not null)
+            .ToDictionary(
+                element => (string)element.Attribute(Xaml + "Key")!,
+                element => element.Name.LocalName,
+                StringComparer.Ordinal);
+        var imageSourceTypes = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "BitmapImage", "BitmapFrame", "CachedBitmap", "ColorConvertedBitmap", "CroppedBitmap",
+            "DrawingImage", "FormatConvertedBitmap", "RenderTargetBitmap", "TransformedBitmap", "WriteableBitmap"
+        };
+
+        // When
+        var violations = documents.SelectMany(source => source.Document.Descendants(Presentation + "Image")
+                .SelectMany(image => Regex.Matches((string?)image.Attribute("Source") ?? string.Empty, @"\{StaticResource\s+([^}\s,]+)")
+                    .Select(match => new { source.Path, Key = match.Groups[1].Value })))
+            .Where(candidate => resourceTypes.TryGetValue(candidate.Key, out var type) && !imageSourceTypes.Contains(type))
+            .Select(candidate =>
+                $"{Path.GetRelativePath(ProjectRoot, candidate.Path)}:Image.Source -> {candidate.Key} ({resourceTypes[candidate.Key]})")
+            .Order(StringComparer.Ordinal)
+            .ToArray();
+
+        // Then
+        Assert.True(
+            violations.Length == 0,
+            $"Image.Source StaticResources must declare ImageSource objects: {string.Join(", ", violations)}");
+    }
+
+    [Fact]
     public void Controls_define_touch_focus_pressed_hover_and_disabled_states()
     {
         var controls = Load(Path.Combine(ResourcesRoot, "KioskControls.xaml"));
