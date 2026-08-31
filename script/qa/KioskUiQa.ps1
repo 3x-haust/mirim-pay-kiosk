@@ -37,7 +37,7 @@ foreach ($artifactName in $artifactNames) {
 Add-Type -AssemblyName UIAutomationClient
 Add-Type -AssemblyName UIAutomationTypes
 Add-Type -AssemblyName System.Drawing
-Add-Type -ReferencedAssemblies @("UIAutomationClient", "UIAutomationTypes", "System.Drawing") -TypeDefinition @'
+Add-Type -ReferencedAssemblies @("UIAutomationClient", "UIAutomationTypes", "WindowsBase", "System.Drawing") -TypeDefinition @'
 using System;
 using System.Diagnostics;
 using System.Drawing;

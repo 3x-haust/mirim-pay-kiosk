@@ -27,6 +27,24 @@ public sealed class KioskUiQaScriptTests
     }
 
     [Fact]
+    public void Script_embedded_helper_references_all_required_assemblies()
+    {
+        var addType = Ast.FindAll(
+                node => node is CommandAst command &&
+                        string.Equals(command.GetCommandName(), "Add-Type", StringComparison.OrdinalIgnoreCase) &&
+                        command.Extent.Text.Contains("-ReferencedAssemblies", StringComparison.Ordinal),
+                searchNestedScriptBlocks: true)
+            .Cast<CommandAst>()
+            .Single();
+
+        var arguments = addType.Extent.Text;
+        Assert.Contains("UIAutomationClient", arguments, StringComparison.Ordinal);
+        Assert.Contains("UIAutomationTypes", arguments, StringComparison.Ordinal);
+        Assert.Contains("WindowsBase", arguments, StringComparison.Ordinal);
+        Assert.Contains("System.Drawing", arguments, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Script_uses_event_subscriptions_before_actions_with_bounded_waits()
     {
         Assert.Contains("WindowOpenedEvent", Source, StringComparison.Ordinal);
