@@ -124,6 +124,21 @@ public sealed class KioskUiQaScriptTests
     }
 
     [Fact]
+    public void Capture_uses_centered_largest_nine_by_sixteen_source_rectangle()
+    {
+        var capture = ExtractTypeMethod("GetCaptureRectangle");
+
+        Assert.Contains("Math.Min(bounds.Width, bounds.Height * 9 / 16)", capture, StringComparison.Ordinal);
+        Assert.Contains("Math.Min(bounds.Height, bounds.Width * 16 / 9)", capture, StringComparison.Ordinal);
+        Assert.Contains("bounds.X + (bounds.Width - width) / 2", capture, StringComparison.Ordinal);
+        Assert.Contains("bounds.Y + (bounds.Height - height) / 2", capture, StringComparison.Ordinal);
+        Assert.Contains("Math.Round", capture, StringComparison.Ordinal);
+        Assert.Equal((656, 0, 608, 1080), CenteredSource(1920, 1080));
+        Assert.Equal((0, 0, 1080, 1920), CenteredSource(1080, 1920));
+        Assert.DoesNotContain("Desktop must expose the kiosk at exactly 1080x1920", Source, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Script_asserts_total_order_and_four_portrait_pngs()
     {
         Assert.Contains("5,000\\uC6D0", Source, StringComparison.Ordinal);
@@ -205,7 +220,7 @@ public sealed class KioskUiQaScriptTests
     private static string ExtractTypeMethod(string methodName)
     {
         var match = Regex.Match(Source,
-            $@"public static void {methodName}\b[\s\S]*?^    }}",
+            $@"public static [^ ]+ {methodName}\b[\s\S]*?^    }}",
             RegexOptions.Multiline | RegexOptions.CultureInvariant);
         Assert.True(match.Success, $"Missing helper method {methodName}.");
         return match.Value;
@@ -220,6 +235,13 @@ public sealed class KioskUiQaScriptTests
             .SingleOrDefault();
         Assert.NotNull(function);
         return function.Extent.Text;
+    }
+
+    private static (int X, int Y, int Width, int Height) CenteredSource(int width, int height)
+    {
+        var sourceWidth = (int)Math.Round(Math.Min(width, height * 9d / 16d));
+        var sourceHeight = (int)Math.Round(Math.Min(height, width * 16d / 9d));
+        return ((width - sourceWidth) / 2, (height - sourceHeight) / 2, sourceWidth, sourceHeight);
     }
 
     private static void AssertInTextOrder(string text, params string[] values)

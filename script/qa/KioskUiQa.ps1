@@ -220,18 +220,36 @@ public static class KioskUiQa
             throw new InvalidOperationException("The malformed menu error is not visible.");
     }
 
+    public static Rectangle GetCaptureRectangle(Rectangle bounds)
+    {
+        double sourceWidth = Math.Min(bounds.Width, bounds.Height * 9 / 16);
+        double sourceHeight = Math.Min(bounds.Height, bounds.Width * 16 / 9);
+        int width = Convert.ToInt32(Math.Round(sourceWidth));
+        int height = Convert.ToInt32(Math.Round(sourceHeight));
+        int x = bounds.X + (bounds.Width - width) / 2;
+        int y = bounds.Y + (bounds.Height - height) / 2;
+        return new Rectangle(x, y, width, height);
+    }
+
     public static void Capture(AutomationElement window, string evidenceDir, string fileName)
     {
         System.Windows.Rect bounds = window.Current.BoundingRectangle;
-        int width = Convert.ToInt32(Math.Round(bounds.Width));
-        int height = Convert.ToInt32(Math.Round(bounds.Height));
-        if (width != 1080 || height != 1920)
-            throw new InvalidOperationException("Desktop must expose the kiosk at exactly 1080x1920 pixels.");
+        Rectangle desktop = new Rectangle(
+            Convert.ToInt32(Math.Round(bounds.Left)), Convert.ToInt32(Math.Round(bounds.Top)),
+            Convert.ToInt32(Math.Round(bounds.Width)), Convert.ToInt32(Math.Round(bounds.Height)));
+        Rectangle source = GetCaptureRectangle(desktop);
+        using (Bitmap captured = new Bitmap(source.Width, source.Height, PixelFormat.Format32bppArgb))
+        using (Graphics captureGraphics = Graphics.FromImage(captured))
         using (Bitmap portrait = new Bitmap(1080, 1920, PixelFormat.Format32bppArgb))
         using (Graphics graphics = Graphics.FromImage(portrait))
+        using (ImageAttributes attributes = new ImageAttributes())
         {
-            graphics.CopyFromScreen(
-                Convert.ToInt32(bounds.Left), Convert.ToInt32(bounds.Top), 0, 0, portrait.Size);
+            captureGraphics.CopyFromScreen(source.Location, Point.Empty, source.Size);
+            graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+            graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.Half;
+            attributes.SetWrapMode(System.Drawing.Drawing2D.WrapMode.TileFlipXY);
+            graphics.DrawImage(captured, new Rectangle(0, 0, portrait.Width, portrait.Height),
+                0, 0, captured.Width, captured.Height, GraphicsUnit.Pixel, attributes);
             portrait.Save(Path.Combine(evidenceDir, fileName), ImageFormat.Png);
         }
     }
