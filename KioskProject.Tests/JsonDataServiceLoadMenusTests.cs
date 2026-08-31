@@ -154,6 +154,27 @@ public sealed class JsonDataServiceLoadMenusTests
         AssertInvalidItem(ValidItem(overrides: new Dictionary<string, string> { [property] = value }));
     }
 
+    [Theory]
+    [InlineData("../secret.png")]
+    [InlineData("Images/../../secret.png")]
+    [InlineData("C:/secret.png")]
+    [InlineData("\\\\server\\share\\secret.png")]
+    [InlineData("https://example.com/menu.png")]
+    [InlineData("file:///secret.png")]
+    [InlineData("Assets/menu.png")]
+    [InlineData("Images\\products\\a.png")]
+    public void LoadMenus_rejects_unsafe_image_path_that_can_escape_packaged_assets(string imagePath)
+    {
+        // Given
+        var item = ValidItem(overrides: new Dictionary<string, string>
+        {
+            ["imagePath"] = JsonSerializer.Serialize(imagePath)
+        });
+
+        // When / Then
+        AssertInvalidItem(item);
+    }
+
     [Fact]
     public void LoadMenus_throws_invalid_data_when_id_is_duplicated()
     {

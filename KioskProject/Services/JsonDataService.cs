@@ -170,6 +170,20 @@ public class JsonDataService : IDataService
         RequireNonNegativeInteger(item, "price", index);
         RequireNonBlankString(item, "category", index);
         RequireNonBlankString(item, "imagePath", index);
+        var imagePath = item.GetProperty("imagePath").GetString()!;
+        var imageSegments = imagePath.Split('/');
+        var imagesDirectory = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "Images"));
+        var imageFilePath = Path.GetFullPath(Path.Combine(imagesDirectory, imagePath));
+        if (Uri.TryCreate(imagePath, UriKind.Absolute, out _) ||
+            Path.IsPathRooted(imagePath) ||
+            imagePath.Contains('\\') ||
+            imageSegments.Any(segment => segment is "" or "." or "..") ||
+            !imagePath.StartsWith("Images/", StringComparison.Ordinal) ||
+            !imageFilePath.StartsWith(imagesDirectory + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+        {
+            throw InvalidMenu(index, "imagePath must be a canonical packaged asset path");
+        }
+
         RequireNonNegativeInteger(item, "stock", index);
     }
 
