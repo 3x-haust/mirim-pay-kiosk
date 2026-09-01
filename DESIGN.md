@@ -44,3 +44,4 @@ Menu start -> Cart -> Payment selection -> Payment success -> Menu start
 - Scanner input uses the Cart frame without displaying a non-Figma form.
 - All event waits are subscribed before action and bounded; no sleeps or polling.
 - The UI must remain real WPF controls and resources, never a pasted screenshot.
+- User-requested exception: the empty Cart body exposes a collapsed-by-default `시연 상품 추가` affordance, shown only when the shared cart is empty; it is a demo-only control and is not part of populated Figma screenshot states.

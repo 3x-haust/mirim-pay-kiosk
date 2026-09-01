@@ -31,6 +31,7 @@ public class MenuViewModel : INotifyPropertyChanged
         }
 
         ScanBarcodeCommand = new MenuCommand(_ => ScanBarcode(), _ => CanPurchase);
+        AddDemoProductCommand = new MenuCommand(_ => AddDemoProduct(), _ => FindDemoProduct() is not null);
     }
 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -61,6 +62,8 @@ public class MenuViewModel : INotifyPropertyChanged
 
     public ICommand ScanBarcodeCommand { get; }
 
+    public ICommand AddDemoProductCommand { get; }
+
     public void AddToCart(MenuItem menu, int quantity)
     {
         if (!CanPurchase)
@@ -71,6 +74,21 @@ public class MenuViewModel : INotifyPropertyChanged
         Cart.AddToCart(menu, quantity);
         Status = Cart.Status;
     }
+
+    private void AddDemoProduct()
+    {
+        var menu = FindDemoProduct();
+        if (menu is not null)
+        {
+            AddToCart(menu, 1);
+        }
+    }
+
+    private MenuItem? FindDemoProduct() => Menus.FirstOrDefault(menu =>
+    {
+        var quantity = Cart.CartItems.FirstOrDefault(item => item.Menu.Id == menu.Id)?.Quantity ?? 0;
+        return menu.Stock > quantity;
+    });
 
     public void ScanBarcode()
     {

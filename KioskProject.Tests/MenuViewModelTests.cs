@@ -90,6 +90,71 @@ public sealed partial class MenuViewModelTests
     }
 
     [Fact]
+    public void AddDemoProductCommand_adds_one_unit_of_first_in_stock_menu_to_shared_cart()
+    {
+        // Given
+        var unavailable = CreateMenu(1, "Drinks", 0);
+        var available = CreateMenu(2, "Food", 2);
+        var cart = CreateCart();
+        var menu = CreateMenuViewModel(CreateDataService(new[] { unavailable, available }).Proxy, cart);
+        var command = Assert.IsAssignableFrom<System.Windows.Input.ICommand>(Read<object>(menu, "AddDemoProductCommand"));
+
+        // When
+        command.Execute(null);
+
+        // Then
+        var cartItem = Assert.Single(ReadItems(cart, "CartItems"));
+        Assert.Same(available, Read<object>(cartItem, "Menu"));
+        Assert.Equal(1, Read<int>(cartItem, "Quantity"));
+    }
+
+    [Fact]
+    public void AddDemoProductCommand_is_disabled_without_an_in_stock_menu()
+    {
+        // Given
+        var menu = CreateMenuViewModel(
+            CreateDataService(new[] { CreateMenu(1, "Drinks", 0) }).Proxy,
+            CreateCart());
+        var command = Assert.IsAssignableFrom<System.Windows.Input.ICommand>(Read<object>(menu, "AddDemoProductCommand"));
+
+        // When
+        var canExecute = command.CanExecute(null);
+
+        // Then
+        Assert.False(canExecute);
+    }
+
+    [Fact]
+    public void AddDemoProductCommand_is_disabled_after_catalog_load_failure()
+    {
+        // Given
+        var menu = CreateMenuViewModel(
+            CreateDataService(Array.Empty<object>(), new IOException("offline")).Proxy,
+            CreateCart());
+        var command = Assert.IsAssignableFrom<System.Windows.Input.ICommand>(Read<object>(menu, "AddDemoProductCommand"));
+
+        // When
+        var canExecute = command.CanExecute(null);
+
+        // Then
+        Assert.False(canExecute);
+    }
+
+    [Fact]
+    public void AddDemoProductCommand_is_disabled_for_an_empty_catalog()
+    {
+        // Given
+        var menu = CreateMenuViewModel(CreateDataService(Array.Empty<object>()).Proxy, CreateCart());
+        var command = Assert.IsAssignableFrom<System.Windows.Input.ICommand>(Read<object>(menu, "AddDemoProductCommand"));
+
+        // When
+        var canExecute = command.CanExecute(null);
+
+        // Then
+        Assert.False(canExecute);
+    }
+
+    [Fact]
     public void AddToCart_uses_injected_shared_cart_and_exact_add_api()
     {
         // Given

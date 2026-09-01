@@ -216,6 +216,28 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
+            <Button Grid.Row="2"
+                    automation:AutomationProperties.AutomationId="DemoAddProductButton"
+                    Width="300"
+                    Height="96"
+                    MinHeight="0"
+                    Margin="0,0,0,72"
+                    FontSize="{StaticResource KioskTypeLabel}"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Bottom"
+                    Command="{Binding Menu.AddDemoProductCommand}"
+                    Content="시연 상품 추가">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource KioskSecondaryButtonStyle}">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Cart.CartItems.Count}" Value="0">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
             <Border Grid.Row="3"
                     Background="{StaticResource KioskSurfaceBrush}"
                     BorderBrush="{StaticResource KioskTextBrush}"

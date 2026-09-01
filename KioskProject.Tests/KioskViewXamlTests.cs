@@ -20,7 +20,7 @@ public sealed class KioskViewXamlTests
             ["CartView.xaml"] =
             [
                 "CartViewRoot", "CartBarcodeState", "BarcodeInput", "BarcodeAddButton", "RemoveButton", "DecreaseButton",
-                "IncreaseButton", "PaymentButton"
+                "IncreaseButton", "PaymentButton", "DemoAddProductButton"
             ],
             ["PaymentView.xaml"] =
             [
@@ -136,6 +136,35 @@ public sealed class KioskViewXamlTests
         Assert.True(Regex.Matches(source, "CommandParameter=\\\"{Binding}\\\"").Count >= 3);
         Assert.Contains("Text=\"{Binding Cart.TotalPrice, StringFormat={}{0}원}\"", source, StringComparison.Ordinal);
         Assert.DoesNotContain("Cart.TotalPrice, StringFormat={}{0:N0}원", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Cart_empty_body_exposes_one_demo_product_button_with_contract_binding_and_layout()
+    {
+        // Given
+        var source = Source("CartView.xaml");
+        var document = Load("CartView.xaml");
+
+        // When
+        var buttons = document.Descendants(Presentation + "Button")
+            .Where(element => (string?)element.Attribute(Automation + "AutomationProperties.AutomationId") == "DemoAddProductButton")
+            .ToArray();
+
+        // Then
+        var button = Assert.Single(buttons);
+        Assert.Equal("{Binding Menu.AddDemoProductCommand}", button.Attribute("Command")?.Value);
+        Assert.Equal("시연 상품 추가", button.Attribute("Content")?.Value);
+        Assert.Equal("2", button.Attribute("Grid.Row")?.Value);
+        Assert.Equal("Center", button.Attribute("HorizontalAlignment")?.Value);
+        Assert.Equal("Bottom", button.Attribute("VerticalAlignment")?.Value);
+        Assert.Equal("300", button.Attribute("Width")?.Value);
+        Assert.Equal("96", button.Attribute("Height")?.Value);
+        Assert.Equal("{StaticResource KioskTypeLabel}", button.Attribute("FontSize")?.Value);
+        Assert.Contains(button.Descendants(Presentation + "Style"), element =>
+            element.Attribute("BasedOn")?.Value == "{StaticResource KioskSecondaryButtonStyle}");
+        Assert.Matches(@"0,0,0,[1-9][0-9]*", button.Attribute("Margin")?.Value ?? string.Empty);
+        Assert.Contains("Cart.CartItems.Count", source, StringComparison.Ordinal);
+        Assert.Contains("Collapsed", source, StringComparison.Ordinal);
     }
 
     [Fact]
