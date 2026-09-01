@@ -24,7 +24,6 @@ public class MainViewModel : INotifyPropertyChanged
     private string _selectedPaymentMethod = string.Empty;
     private string _paymentError = string.Empty;
     private Order? _lastOrder;
-    private bool _isStartScreen = true;
     private int _paymentInFlight;
 
     public MainViewModel()
@@ -42,11 +41,8 @@ public class MainViewModel : INotifyPropertyChanged
         OrderService = new OrderService(dataService);
 
         StartOrderCommand = new MainCommand(
-            _ => IsStartScreen = false,
-            _ => CurrentView == KioskView.Menu && IsStartScreen && Menu.CanPurchase);
-        ShowCartCommand = new MainCommand(
             _ => CurrentView = KioskView.Cart,
-            _ => CurrentView == KioskView.Menu);
+            _ => CurrentView == KioskView.Menu && Menu.CanPurchase);
         ShowMenuCommand = new MainCommand(
             _ => CurrentView = KioskView.Menu,
             _ => CurrentView == KioskView.Cart);
@@ -72,7 +68,6 @@ public class MainViewModel : INotifyPropertyChanged
         _commands =
         [
             (MainCommand)StartOrderCommand,
-            (MainCommand)ShowCartCommand,
             (MainCommand)ShowMenuCommand,
             (MainCommand)ClearCartCommand,
             (MainCommand)ShowPaymentCommand,
@@ -134,15 +129,7 @@ public class MainViewModel : INotifyPropertyChanged
         private set => SetValue(ref _lastOrder, value, nameof(LastOrder));
     }
 
-    public bool IsStartScreen
-    {
-        get => _isStartScreen;
-        private set => SetValue(ref _isStartScreen, value, nameof(IsStartScreen));
-    }
-
     public ICommand StartOrderCommand { get; }
-
-    public ICommand ShowCartCommand { get; }
 
     public ICommand ShowMenuCommand { get; }
 
@@ -262,7 +249,6 @@ public class MainViewModel : INotifyPropertyChanged
     private void AcknowledgePayment()
     {
         ResetPaymentState();
-        IsStartScreen = true;
         CurrentView = KioskView.Menu;
     }
 

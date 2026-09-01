@@ -51,6 +51,36 @@ public sealed class KioskFigmaVisualContractTests
     }
 
     [Fact]
+    public void Cart_view_owns_non_rendering_scanner_controls()
+    {
+        var cart = Load("CartView.xaml");
+        var barcodeInput = ById(cart, "BarcodeInput");
+        var barcodeAddButton = ById(cart, "BarcodeAddButton");
+
+        Assert.Equal("{Binding BarcodeInput, UpdateSourceTrigger=PropertyChanged}", barcodeInput.Attribute("Text")?.Value);
+        Assert.Equal("{Binding ScanBarcodeCommand}", barcodeAddButton.Attribute("Command")?.Value);
+        Assert.Equal("1", barcodeInput.Attribute("Width")?.Value);
+        Assert.Equal("1", barcodeInput.Attribute("Height")?.Value);
+        Assert.Equal("0", barcodeInput.Attribute("Opacity")?.Value);
+        Assert.Equal("1", barcodeAddButton.Attribute("Width")?.Value);
+        Assert.Equal("1", barcodeAddButton.Attribute("Height")?.Value);
+        Assert.Equal("0", barcodeAddButton.Attribute("MinWidth")?.Value);
+        Assert.Equal("0", barcodeAddButton.Attribute("MinHeight")?.Value);
+        Assert.Equal("0", barcodeAddButton.Attribute("Opacity")?.Value);
+    }
+
+    [Fact]
+    public void Cart_clear_button_matches_Figma_label_contract()
+    {
+        var clearButton = ById(Load("CartView.xaml"), "ClearCartButton");
+
+        Assert.Equal("상품 전체 삭제", clearButton.Attribute("Content")?.Value);
+        Assert.Equal("230", clearButton.Attribute("Width")?.Value);
+        Assert.Equal("96", clearButton.Attribute("Height")?.Value);
+        Assert.Equal("{StaticResource KioskTypeLabel}", clearButton.Attribute("FontSize")?.Value);
+    }
+
+    [Fact]
     public void Cart_matches_Figma_geometry_contract()
     {
         var xaml = Load("CartView.xaml");

@@ -149,33 +149,6 @@
                                    Style="{StaticResource KioskTextStyle}"
                                    Text="결제 수단을 선택해주세요"
                                    TextWrapping="Wrap" />
-                        <Border automation:AutomationProperties.AutomationId="PaymentErrorState"
-                                MaxWidth="850"
-                                Margin="0,28,0,0"
-                                HorizontalAlignment="Left"
-                                Background="{StaticResource KioskSurfaceBrush}"
-                                BorderBrush="{StaticResource KioskPrimaryStrongBrush}"
-                                BorderThickness="{StaticResource KioskBorderOutline}"
-                                CornerRadius="{StaticResource KioskActionRadius}"
-                                Padding="{StaticResource KioskSpaceControl}">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Setter Property="Visibility" Value="Visible" />
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding PaymentError}" Value="">
-                                            <Setter Property="Visibility" Value="Collapsed" />
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding PaymentError}" Value="{x:Null}">
-                                            <Setter Property="Visibility" Value="Collapsed" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <TextBlock Foreground="{StaticResource KioskPrimaryStrongBrush}"
-                                       Style="{StaticResource KioskTextStyle}"
-                                       Text="{Binding PaymentError}"
-                                       TextWrapping="Wrap" />
-                        </Border>
                     </StackPanel>
 
                     <Canvas>

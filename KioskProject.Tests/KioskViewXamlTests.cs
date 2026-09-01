@@ -15,17 +15,16 @@ public sealed class KioskViewXamlTests
         {
             ["MenuView.xaml"] =
             [
-                "MenuViewRoot", "MenuStartState", "MenuCatalogState", "MenuEmptyState", "OrderButton", "BarcodeInput",
-                "AddButton", "CartButton"
+                "MenuViewRoot", "MenuStartState", "OrderButton"
             ],
             ["CartView.xaml"] =
             [
-                "CartViewRoot", "CartBarcodeState", "CartEmptyState", "RemoveButton", "DecreaseButton", "IncreaseButton",
-                "PaymentButton"
+                "CartViewRoot", "CartBarcodeState", "BarcodeInput", "BarcodeAddButton", "RemoveButton", "DecreaseButton",
+                "IncreaseButton", "PaymentButton"
             ],
             ["PaymentView.xaml"] =
             [
-                "PaymentViewRoot", "PaymentSelectionState", "PaymentSuccessState", "PaymentErrorState",
+                "PaymentViewRoot", "PaymentSelectionState", "PaymentSuccessState",
                 "PayPaymentButton", "FacePaymentButton", "BackButton", "NextButton", "CompleteButton"
             ]
         };
@@ -79,16 +78,49 @@ public sealed class KioskViewXamlTests
     }
 
     [Fact]
-    public void Menu_view_binds_catalog_category_barcode_cart_commands_and_status()
+    public void Payment_view_keeps_save_failures_on_the_selection_frame()
+    {
+        // Given
+        var source = Source("PaymentView.xaml");
+
+        // When
+        var document = Load("PaymentView.xaml");
+
+        // Then
+        Assert.DoesNotContain("PaymentErrorState", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("PaymentError", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("PaymentErrorState", document.ToString(SaveOptions.DisableFormatting), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Menu_view_contains_only_the_Figma_start_state()
+    {
+        var source = Source("MenuView.xaml");
+        var document = Load("MenuView.xaml");
+        var ids = document.Descendants()
+            .Select(element => (string?)element.Attribute(Automation + "AutomationProperties.AutomationId"))
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Cast<string>()
+            .ToArray();
+
+        Assert.Contains("MenuStartState", ids);
+        Assert.DoesNotContain("MenuCatalogState", ids);
+        Assert.DoesNotContain("MenuEmptyState", ids);
+        Assert.DoesNotContain("AddButton", ids);
+        Assert.DoesNotContain("CartButton", ids);
+        Assert.DoesNotContain("IsStartScreen", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("Categories", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("FilteredMenus", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("BarcodeInput", source, StringComparison.Ordinal);
+        Assert.DoesNotContain("BarcodeAddButton", source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Menu_view_binds_start_command_and_non_page_load_messages()
     {
         var source = Source("MenuView.xaml");
         AssertBindingPaths(source,
-            "IsStartScreen", "Menu.IsEmpty", "Menu.HasLoadError", "Menu.Categories", "Menu.SelectedCategory", "Menu.FilteredMenus",
-            "Menu.BarcodeInput", "Menu.ScanBarcodeCommand", "DataContext.Menu.AddCommand", "Menu.Status", "Cart.TotalQuantity",
-            "StartOrderCommand", "ShowCartCommand");
-
-        Assert.Contains("CommandParameter=\"{Binding}\"", source, StringComparison.Ordinal);
-        Assert.Contains("UpdateSourceTrigger=PropertyChanged", source, StringComparison.Ordinal);
+            "Menu.CanPurchase", "StartOrderCommand");
     }
 
     [Fact]
@@ -96,20 +128,22 @@ public sealed class KioskViewXamlTests
     {
         var source = Source("CartView.xaml");
         AssertBindingPaths(source,
-            "Cart.CartItems", "Menu.Name", "Menu.Price", "Quantity", "Subtotal", "DataContext.Cart.RemoveCommand",
-            "DataContext.Cart.DecreaseCommand", "DataContext.Cart.IncreaseCommand", "Cart.TotalQuantity", "Cart.TotalPrice", "ShowPaymentCommand");
+            "Menu", "BarcodeInput", "ScanBarcodeCommand", "Cart.CartItems", "Menu.Name", "Menu.Price", "Quantity", "Subtotal",
+            "DataContext.Cart.RemoveCommand", "DataContext.Cart.DecreaseCommand", "DataContext.Cart.IncreaseCommand",
+            "Cart.TotalQuantity", "Cart.TotalPrice", "ShowPaymentCommand");
 
+        Assert.Contains("Key=\"Enter\"", source, StringComparison.Ordinal);
         Assert.True(Regex.Matches(source, "CommandParameter=\\\"{Binding}\\\"").Count >= 3);
         Assert.Contains("Text=\"{Binding Cart.TotalPrice, StringFormat={}{0}원}\"", source, StringComparison.Ordinal);
         Assert.DoesNotContain("Cart.TotalPrice, StringFormat={}{0:N0}원", source, StringComparison.Ordinal);
     }
 
     [Fact]
-    public void Payment_view_exposes_selection_success_and_error_with_order_summary_commands()
+    public void Payment_view_exposes_selection_and_success_with_order_summary_commands()
     {
         var source = Source("PaymentView.xaml");
         AssertBindingPaths(source,
-            "IsPaymentSuccessful", "PaymentError", "SelectedPaymentMethod", "Cart.TotalQuantity", "Cart.TotalPrice",
+            "IsPaymentSuccessful", "SelectedPaymentMethod", "Cart.TotalQuantity", "Cart.TotalPrice",
             "SelectPaymentMethodCommand", "BackToCartCommand", "CompletePaymentCommand", "AcknowledgePaymentCommand");
 
         Assert.Contains("CommandParameter=\"Pay\"", source, StringComparison.Ordinal);
@@ -173,8 +207,7 @@ public sealed class KioskViewXamlTests
                 ((string?)element.Attribute("Style"))?.Contains("Kiosk", StringComparison.Ordinal) == true);
         });
 
-        Assert.Contains(Load("MenuView.xaml").Descendants(Presentation + "ScrollViewer"), element =>
-            (string?)element.Attribute("VerticalScrollBarVisibility") == "Auto");
+        Assert.Empty(Load("MenuView.xaml").Descendants(Presentation + "ScrollViewer"));
         Assert.Contains(Load("CartView.xaml").Descendants(Presentation + "ScrollViewer"), element =>
             (string?)element.Attribute("VerticalScrollBarVisibility") == "Auto");
     }

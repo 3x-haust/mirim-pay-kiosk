@@ -201,7 +201,6 @@ public sealed class PaymentStateMachineTests
         // Then
         Assert.True(resetObservedBeforeMenu);
         Assert.Equal("Menu", fixture.State("CurrentView"));
-        Assert.True(MainViewModelFixture.Read<bool>(fixture.ViewModel, "IsStartScreen"));
         Assert.Equal("Selecting", fixture.State("PaymentPhase"));
         Assert.Equal(string.Empty, MainViewModelFixture.Read<string>(fixture.ViewModel, "SelectedPaymentMethod"));
         Assert.Equal(string.Empty, MainViewModelFixture.Read<string>(fixture.ViewModel, "PaymentError"));
@@ -211,7 +210,6 @@ public sealed class PaymentStateMachineTests
         // When
         fixture.Execute("StartOrderCommand");
         fixture.Add();
-        fixture.Execute("ShowCartCommand");
         fixture.Execute("ShowPaymentCommand");
 
         // Then
@@ -250,7 +248,6 @@ public sealed class PaymentStateMachineTests
         var fixture = MainViewModelFixture.Create();
         fixture.Execute("StartOrderCommand");
         fixture.Add();
-        fixture.Execute("ShowCartCommand");
         fixture.Execute("ShowPaymentCommand");
         return fixture;
     }

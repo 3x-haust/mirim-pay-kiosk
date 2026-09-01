@@ -9,7 +9,6 @@
         <sys:Double x:Key="CartLogoSize">110</sys:Double>
         <sys:Double x:Key="CartQuantityButtonSize">96</sys:Double>
         <Thickness x:Key="CartTitleSpacing">54,62,54,38</Thickness>
-        <Thickness x:Key="CartListSpacing">54,0,54,30</Thickness>
         <Thickness x:Key="CartItemSpacing">0,13</Thickness>
         <TranslateTransform x:Key="CartClearButtonOffset" X="-1" Y="2" />
         <TranslateTransform x:Key="CartCardUpTransform" Y="-5" />
@@ -42,6 +41,33 @@
                 <RowDefinition Height="{StaticResource CartFooterHeight}" />
             </Grid.RowDefinitions>
 
+            <Grid Width="1"
+                  Height="1"
+                  HorizontalAlignment="Left"
+                  VerticalAlignment="Top"
+                  Panel.ZIndex="1"
+                  DataContext="{Binding Menu}"
+                  FocusManager.FocusedElement="{Binding ElementName=BarcodeInputControl}">
+                <TextBox x:Name="BarcodeInputControl"
+                         automation:AutomationProperties.AutomationId="BarcodeInput"
+                         Width="1"
+                         Height="1"
+                         Opacity="0"
+                         Text="{Binding BarcodeInput, UpdateSourceTrigger=PropertyChanged}">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding ScanBarcodeCommand}" />
+                    </TextBox.InputBindings>
+                </TextBox>
+                <Button automation:AutomationProperties.AutomationId="BarcodeAddButton"
+                        Width="1"
+                        Height="1"
+                        MinWidth="0"
+                        MinHeight="0"
+                        Opacity="0"
+                        Command="{Binding ScanBarcodeCommand}"
+                        Style="{StaticResource KioskPrimaryButtonStyle}" />
+            </Grid>
+
             <Border Style="{StaticResource KioskHeaderStyle}">
                 <Image Width="{StaticResource CartLogoSize}"
                        Height="{StaticResource CartLogoSize}"
@@ -68,7 +94,8 @@
                 <Button Grid.Column="1"
                         automation:AutomationProperties.AutomationId="ClearCartButton"
                         Width="230"
-                        Height="95"
+                        Height="96"
+                        FontSize="{StaticResource KioskTypeLabel}"
                         MinHeight="0"
                         Margin="0,0,-9,0"
                         Background="{StaticResource KioskPrimaryStrongBrush}"
@@ -189,29 +216,6 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
-            <Border Grid.Row="2"
-                    automation:AutomationProperties.AutomationId="CartEmptyState"
-                    Margin="{StaticResource CartListSpacing}"
-                    Background="{StaticResource KioskSurfaceBrush}"
-                    Padding="{StaticResource KioskSpacePage}">
-                <Border.Style>
-                    <Style TargetType="Border">
-                        <Setter Property="Visibility" Value="Collapsed" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Cart.CartItems.Count}" Value="0">
-                                <Setter Property="Visibility" Value="Visible" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
-                <TextBlock HorizontalAlignment="Center"
-                           VerticalAlignment="Center"
-                           Style="{StaticResource KioskTextStyle}"
-                           Text="장바구니가 비어 있습니다."
-                           TextAlignment="Center"
-                           TextWrapping="Wrap" />
-            </Border>
-
             <Border Grid.Row="3"
                     Background="{StaticResource KioskSurfaceBrush}"
                     BorderBrush="{StaticResource KioskTextBrush}"

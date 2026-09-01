@@ -16,9 +16,22 @@ public sealed class MainViewModelNavigationTests
         Assert.Equal(new[] { "Selecting", "Saving", "Success" },
             Enum.GetNames(MainViewModelFixture.RequireType("KioskProject.ViewModels.PaymentPhase")));
         Assert.Equal("Menu", fixture.State("CurrentView"));
-        Assert.True(MainViewModelFixture.Read<bool>(fixture.ViewModel, "IsStartScreen"));
         Assert.Same(fixture.Cart, MainViewModelFixture.Read<object>(fixture.Menu, "Cart"));
         Assert.Same(fixture.DataService.Proxy, MainViewModelFixture.Read<object>(fixture.ViewModel, "DataService"));
+    }
+
+    [Fact]
+    public void Start_order_command_transitions_directly_from_menu_to_cart()
+    {
+        // Given
+        var fixture = MainViewModelFixture.Create();
+        Assert.Equal("Menu", fixture.State("CurrentView"));
+
+        // When
+        fixture.Execute("StartOrderCommand");
+
+        // Then
+        Assert.Equal("Cart", fixture.State("CurrentView"));
     }
 
     [Fact]
@@ -32,15 +45,13 @@ public sealed class MainViewModelNavigationTests
         fixture.Add();
 
         // When
-        fixture.Execute("ShowCartCommand");
         fixture.Execute("ShowMenuCommand");
 
         // Then
         Assert.Equal("Menu", fixture.State("CurrentView"));
-        Assert.False(MainViewModelFixture.Read<bool>(fixture.ViewModel, "IsStartScreen"));
         Assert.Same(cartCollection, MainViewModelFixture.Read<object>(fixture.Cart, "CartItems"));
         Assert.Single(fixture.CartItems());
-        Assert.Equal(new[] { "IsStartScreen", "CurrentView", "CurrentView" }, notifications);
+        Assert.Equal(new[] { "CurrentView", "CurrentView" }, notifications);
     }
 
     [Fact]
@@ -49,7 +60,6 @@ public sealed class MainViewModelNavigationTests
         // Given
         var fixture = MainViewModelFixture.Create();
         fixture.Execute("StartOrderCommand");
-        fixture.Execute("ShowCartCommand");
         var checkout = fixture.Command("ShowPaymentCommand");
         var enablementNotifications = 0;
         checkout.CanExecuteChanged += (_, _) => enablementNotifications++;
@@ -84,8 +94,8 @@ public sealed class MainViewModelNavigationTests
     {
         // Given
         var fixture = MainViewModelFixture.Create();
+        fixture.Execute("StartOrderCommand");
         fixture.Add();
-        fixture.Execute("ShowCartCommand");
         fixture.Execute("ShowPaymentCommand");
         fixture.Execute("SelectPaymentMethodCommand", "Pay");
         fixture.DataService.SaveException = new IOException("offline");
@@ -116,8 +126,8 @@ public sealed class MainViewModelNavigationTests
     {
         // Given
         var fixture = MainViewModelFixture.Create();
+        fixture.Execute("StartOrderCommand");
         fixture.Add();
-        fixture.Execute("ShowCartCommand");
         var collection = MainViewModelFixture.Read<object>(fixture.Cart, "CartItems");
 
         // When

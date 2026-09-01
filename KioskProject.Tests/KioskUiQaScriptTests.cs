@@ -117,11 +117,16 @@ public sealed class KioskUiQaScriptTests
             .ToHashSet(StringComparer.Ordinal);
 
         Assert.Equal(
-            new[] { "BarcodeAddButton", "BarcodeInput", "CartButton", "CompleteButton", "IncreaseButton", "NextButton", "OrderButton", "PayPaymentButton", "PaymentButton" },
+            new[] { "BarcodeAddButton", "BarcodeInput", "CompleteButton", "IncreaseButton", "NextButton", "OrderButton", "PayPaymentButton", "PaymentButton" },
             drivenIds.Order(StringComparer.Ordinal));
         Assert.All(drivenIds, id => Assert.Contains(id, xamlIds));
-        AssertInOrder("OrderButton", "BarcodeInput", "BarcodeAddButton", "CartButton", "IncreaseButton",
+        Assert.DoesNotContain("CartButton", Source, StringComparison.Ordinal);
+        Assert.DoesNotContain("MenuCatalogState", Source, StringComparison.Ordinal);
+        AssertInOrder("OrderButton", "BarcodeInput", "BarcodeAddButton", "IncreaseButton",
             "PaymentButton", "PayPaymentButton", "NextButton", "CompleteButton");
+        Assert.Equal(2, Regex.Matches(Source, "InvokeAndWait\\(\\$window, \\\"OrderButton\\\", \\\"BarcodeInput\\\"", RegexOptions.CultureInvariant).Count);
+        Assert.DoesNotContain("InvokeAndWait($window, \"OrderButton\", \"CartViewRoot\"", Source, StringComparison.Ordinal);
+        AssertInTextOrder(Source, "OrderButton", "BarcodeInput", "Add-Action \"start-order\" \"Cart\"");
     }
 
     [Fact]
@@ -215,6 +220,8 @@ public sealed class KioskUiQaScriptTests
         Assert.DoesNotContain("total-4200", Source, StringComparison.Ordinal);
         Assert.DoesNotContain("InvokeAndWait($window, \"BarcodeAddButton\", $null, $null, -1)", Source, StringComparison.Ordinal);
         AssertInTextOrder(Source, "barcode = \"1\"; expectedCount = [KioskUiQa]::VisualCartCountOne", "barcode = \"2\"; expectedCount = [KioskUiQa]::VisualCartCountTwo", "barcode = \"2\"; expectedCount = [KioskUiQa]::VisualCartCountThree", "barcode = \"3\"; expectedCount = [KioskUiQa]::VisualCartCountFour");
+        Assert.DoesNotContain("CartButton", Source, StringComparison.Ordinal);
+        Assert.DoesNotContain("MenuCatalogState", Source, StringComparison.Ordinal);
         AssertInTextOrder(Source, "SetValueAndWait($window, \"BarcodeInput\", $barcode)", "InvokeAndWait($window, \"BarcodeAddButton\", $null, $expectedCount, -1)");
         AssertInTextOrder(Source, "visualEvidenceDir", "visual-menu", "visual-start-order", "visual-barcode-add", "visual-show-cart", "visual-select-pay", "visual-save-order");
         Assert.Equal(4, Regex.Matches(Source, "expectedCount = \\[KioskUiQa\\]::VisualCartCount", RegexOptions.CultureInvariant).Count);
@@ -226,8 +233,9 @@ public sealed class KioskUiQaScriptTests
     public void Failure_fixture_and_cleanup_are_mandatory()
     {
         Assert.Contains("malformed", Source, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("\\uC0C1\\uD488 \\uC815\\uBCF4", Source, StringComparison.Ordinal);
         Assert.Contains("AssertEnabled($window, \"OrderButton\", $false)", Source, StringComparison.Ordinal);
+        Assert.DoesNotContain("AssertLoadError", Source, StringComparison.Ordinal);
+        Assert.DoesNotContain("LoadError", Source, StringComparison.Ordinal);
         Assert.Contains("finally", Source, StringComparison.OrdinalIgnoreCase);
         Assert.Contains("Stop-KioskProcess", Source, StringComparison.Ordinal);
         Assert.Contains("Remove-Item -LiteralPath $qaTempRoot -Recurse -Force", Source, StringComparison.Ordinal);
@@ -235,6 +243,26 @@ public sealed class KioskUiQaScriptTests
         Assert.Contains("processAbsent", Source, StringComparison.Ordinal);
         Assert.Contains("tempDirectoryAbsent", Source, StringComparison.Ordinal);
         Assert.Contains("fixtureRestored", Source, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Malformed_menu_flow_keeps_menu_and_disables_order_without_error_page_or_copy()
+    {
+        // Given
+        var flow = Source[Source.IndexOf("$malformed = Start-KioskProcess", StringComparison.Ordinal)..
+            Source.IndexOf("Stop-KioskProcess $malformed", StringComparison.Ordinal)];
+
+        // When
+        var malformedFlow = flow;
+
+        // Then
+        Assert.DoesNotContain("AssertLoadError", malformedFlow, StringComparison.Ordinal);
+        Assert.DoesNotContain("MenuViewRoot", malformedFlow, StringComparison.Ordinal);
+        Assert.Contains("AssertVisible($window, \"OrderButton\")", malformedFlow, StringComparison.Ordinal);
+        Assert.Contains("AssertEnabled($window, \"OrderButton\", $false)", malformedFlow, StringComparison.Ordinal);
+        Assert.DoesNotContain("PaymentViewRoot", malformedFlow, StringComparison.Ordinal);
+        Assert.DoesNotContain("error-visible", malformedFlow, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("menu-visible-order-disabled", malformedFlow, StringComparison.Ordinal);
     }
 
     [Fact]

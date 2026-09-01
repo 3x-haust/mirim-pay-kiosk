@@ -1,12 +1,32 @@
 using System.Collections;
 using System.Reflection;
-using System.Windows.Input;
 
 namespace KioskProject.Tests;
 
 public sealed partial class MenuViewModelTests
 {
     private static readonly Assembly ProductAssembly = ProductAssemblyFixture.Assembly;
+
+    [Fact]
+    public void Menu_view_model_exposes_only_the_runtime_menu_contract()
+    {
+        // Given
+        var menu = CreateMenuViewModel(CreateDataService(Array.Empty<object>()).Proxy, CreateCart());
+
+        // When
+        var type = menu.GetType();
+
+        // Then
+        foreach (var property in new[] { "FilteredMenus", "Categories", "SelectedCategory", "AddCommand", "FilterCommand", "ResetFilterCommand" })
+        {
+            Assert.Null(type.GetProperty(property));
+        }
+
+        foreach (var method in new[] { "FilterByCategory", "ResetFilter" })
+        {
+            Assert.Null(type.GetMethod(method));
+        }
+    }
 
     [Fact]
     public void Constructor_loads_catalog_once_and_exposes_ready_state_when_data_exists()
@@ -23,7 +43,6 @@ public sealed partial class MenuViewModelTests
         // Then
         Assert.Equal(1, service.LoadCount);
         Assert.Equal(new[] { first, second }, ReadItems(menu, "Menus"));
-        Assert.Equal(new[] { first, second }, ReadItems(menu, "FilteredMenus"));
         Assert.False(Read<bool>(menu, "IsEmpty"));
         Assert.False(Read<bool>(menu, "HasLoadError"));
         Assert.True(Read<bool>(menu, "CanPurchase"));
@@ -42,8 +61,6 @@ public sealed partial class MenuViewModelTests
         // Then
         Assert.Equal(1, service.LoadCount);
         Assert.Empty(ReadItems(menu, "Menus"));
-        Assert.Empty(ReadItems(menu, "FilteredMenus"));
-        Assert.Equal(new[] { "All" }, ReadStrings(menu, "Categories"));
         Assert.True(Read<bool>(menu, "IsEmpty"));
         Assert.False(Read<bool>(menu, "HasLoadError"));
         Assert.False(Read<bool>(menu, "CanPurchase"));
@@ -65,8 +82,6 @@ public sealed partial class MenuViewModelTests
         // Then
         Assert.Equal(1, service.LoadCount);
         Assert.Empty(ReadItems(menu, "Menus"));
-        Assert.Empty(ReadItems(menu, "FilteredMenus"));
-        Assert.Empty(ReadStrings(menu, "Categories"));
         Assert.False(Read<bool>(menu, "IsEmpty"));
         Assert.True(Read<bool>(menu, "HasLoadError"));
         Assert.False(Read<bool>(menu, "CanPurchase"));
@@ -75,88 +90,14 @@ public sealed partial class MenuViewModelTests
     }
 
     [Fact]
-    public void Categories_are_stable_unique_and_preserve_first_seen_order()
-    {
-        // Given
-        var menus = new[]
-        {
-            CreateMenu(1, "Coffee", 1),
-            CreateMenu(1, "Tea", 1),
-            CreateMenu(3, "Coffee", 1),
-            CreateMenu(4, "Food", 1),
-            CreateMenu(5, "Tea", 1)
-        };
-
-        // When
-        var menu = CreateMenuViewModel(CreateDataService(menus).Proxy, CreateCart());
-
-        // Then
-        Assert.Equal(new[] { "All", "Coffee", "Tea", "Food" }, ReadStrings(menu, "Categories"));
-    }
-
-    [Fact]
-    public void Filter_and_reset_change_filtered_view_without_mutating_source_or_collection_identity()
-    {
-        // Given
-        var coffee = CreateMenu(1, "Drinks", 20);
-        var cake = CreateMenu(2, "Food", 5);
-        var tea = CreateMenu(3, "Drinks", 10);
-        var menu = CreateMenuViewModel(CreateDataService(new[] { coffee, cake, tea }).Proxy, CreateCart());
-        var source = Read<object>(menu, "Menus");
-        var filtered = Read<object>(menu, "FilteredMenus");
-
-        // When
-        Invoke(menu, "FilterByCategory", "Drinks");
-
-        // Then
-        Assert.Same(source, Read<object>(menu, "Menus"));
-        Assert.Same(filtered, Read<object>(menu, "FilteredMenus"));
-        Assert.Equal(new[] { coffee, cake, tea }, ReadItems(menu, "Menus"));
-        Assert.Equal(new[] { coffee, tea }, ReadItems(menu, "FilteredMenus"));
-        Assert.Equal("Drinks", Read<string>(menu, "SelectedCategory"));
-
-        // When
-        Invoke(menu, "ResetFilter");
-
-        // Then
-        Assert.Same(source, Read<object>(menu, "Menus"));
-        Assert.Same(filtered, Read<object>(menu, "FilteredMenus"));
-        Assert.Equal(new[] { coffee, cake, tea }, ReadItems(menu, "Menus"));
-        Assert.Equal(new[] { coffee, cake, tea }, ReadItems(menu, "FilteredMenus"));
-        Assert.Equal("All", Read<string>(menu, "SelectedCategory"));
-    }
-
-    [Fact]
-    public void All_category_resets_an_active_filter()
-    {
-        // Given
-        var menus = new[]
-        {
-            CreateMenu(1, "Drinks", 20),
-            CreateMenu(2, "Food", 5)
-        };
-        var menu = CreateMenuViewModel(CreateDataService(menus).Proxy, CreateCart());
-        Invoke(menu, "FilterByCategory", "Food");
-
-        // When
-        Invoke(menu, "FilterByCategory", "All");
-
-        // Then
-        Assert.Equal(menus, ReadItems(menu, "FilteredMenus"));
-        Assert.Equal("All", Read<string>(menu, "SelectedCategory"));
-    }
-
-    [Fact]
-    public void Add_command_uses_injected_shared_cart_and_exact_add_api()
+    public void AddToCart_uses_injected_shared_cart_and_exact_add_api()
     {
         // Given
         var item = CreateMenu(1, "Drinks", 20);
         var cart = CreateCart();
         var menu = CreateMenuViewModel(CreateDataService(new[] { item }).Proxy, cart);
-        var command = Read<ICommand>(menu, "AddCommand");
-
         // When
-        command.Execute(item);
+        Invoke(menu, "AddToCart", item, 1);
 
         // Then
         Assert.Same(cart, Read<object>(menu, "Cart"));
@@ -176,13 +117,10 @@ public sealed partial class MenuViewModelTests
         Invoke(cart, "AddToCart", existing, 1);
         var failed = CreateDataService(Array.Empty<object>(), new IOException("offline"));
         var menu = CreateMenuViewModel(failed.Proxy, cart);
-        var command = Read<ICommand>(menu, "AddCommand");
-
         // When
-        command.Execute(existing);
+        Invoke(menu, "AddToCart", existing, 1);
 
         // Then
-        Assert.False(command.CanExecute(existing));
         Assert.Single(ReadItems(cart, "CartItems"));
         Assert.Equal(100, Read<int>(cart, "TotalPrice"));
         Assert.Equal("load-error", Read<string>(menu, "Status"));
@@ -227,9 +165,6 @@ public sealed partial class MenuViewModelTests
 
     private static IReadOnlyList<object> ReadItems(object target, string property) =>
         Assert.IsAssignableFrom<IEnumerable>(Read<object>(target, property)).Cast<object>().ToArray();
-
-    private static IReadOnlyList<string> ReadStrings(object target, string property) =>
-        Assert.IsAssignableFrom<IEnumerable>(Read<object>(target, property)).Cast<string>().ToArray();
 
     private static void Invoke(object target, string method, params object?[] arguments) =>
         Assert.IsAssignableFrom<MethodInfo>(target.GetType().GetMethod(method)).Invoke(target, arguments);

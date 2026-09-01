@@ -145,7 +145,6 @@ public static class KioskUiQa
     public const string VisualFooterCount = "4\uAC1C";
     public const string VisualCartCount = VisualCartCountFour;
     public const string VisualTotal = "4300\uC6D0";
-    private const string LoadError = "\uC0C1\uD488 \uC815\uBCF4\uB97C \uBD88\uB7EC\uC624\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4.";
 
     public static void SetValueAndWait(AutomationElement window, string automationId, string value)
     {
@@ -233,12 +232,6 @@ public static class KioskUiQa
     {
         if (!StateReached(window, null, VisualFooterCount, -1) || !StateReached(window, null, VisualTotal, -1))
             throw new InvalidOperationException("The visual fixture cart count or total is not visible.");
-    }
-
-    public static void AssertLoadError(AutomationElement window)
-    {
-        if (!StateReached(window, null, LoadError, -1))
-            throw new InvalidOperationException("The malformed menu error is not visible.");
     }
 
     public static Rectangle GetCaptureRectangle(Rectangle bounds)
@@ -456,13 +449,11 @@ try {
     Add-Action "launch" "MenuStartState"
 
     [KioskUiQa]::InvokeAndWait($window, "OrderButton", "BarcodeInput", $null, -1)
-    Add-Action "start-order" "MenuCatalogState"
+    Add-Action "start-order" "Cart"
     [KioskUiQa]::SetValueAndWait($window, "BarcodeInput", "1")
     Add-Action "barcode-input" "1"
     [KioskUiQa]::InvokeAndWait($window, "BarcodeAddButton", $null, [KioskUiQa]::CartCountOne, -1)
     Add-Action "barcode-add" "cart-count-1"
-    [KioskUiQa]::InvokeAndWait($window, "CartButton", "IncreaseButton", $null, -1)
-    Add-Action "show-cart" "CartViewRoot"
     [KioskUiQa]::InvokeAndWait($window, "IncreaseButton", $null, [KioskUiQa]::ExpectedTotal, -1)
     [KioskUiQa]::AssertTotal($window)
     [KioskUiQa]::Capture($window, $EvidenceDir, "02-cart.png")
@@ -493,7 +484,7 @@ try {
     [KioskUiQa]::Capture($window, $visualEvidenceDir, "01-menu.png")
     Add-Action "visual-menu" "01-menu.png"
     [KioskUiQa]::InvokeAndWait($window, "OrderButton", "BarcodeInput", $null, -1)
-    Add-Action "visual-start-order" "MenuCatalogState"
+    Add-Action "visual-start-order" "Cart"
     foreach ($step in @(
         @{ barcode = "1"; expectedCount = [KioskUiQa]::VisualCartCountOne },
         @{ barcode = "2"; expectedCount = [KioskUiQa]::VisualCartCountTwo },
@@ -506,7 +497,6 @@ try {
         [KioskUiQa]::InvokeAndWait($window, "BarcodeAddButton", $null, $expectedCount, -1)
         Add-Action "visual-barcode-add" "$barcode-$expectedCount"
     }
-    [KioskUiQa]::InvokeAndWait($window, "CartButton", "IncreaseButton", $null, -1)
     [KioskUiQa]::AssertVisualCart($window)
     [KioskUiQa]::Capture($window, $visualEvidenceDir, "02-cart.png")
     Add-Action "visual-show-cart" "count-4-total-4300"
@@ -524,9 +514,8 @@ try {
     $malformed = Start-KioskProcess $failureExe
     $window = $malformed.Window
     [KioskUiQa]::AssertVisible($window, "OrderButton")
-    [KioskUiQa]::AssertLoadError($window)
     [KioskUiQa]::AssertEnabled($window, "OrderButton", $false)
-    Add-Action "malformed-menu" "error-visible-order-disabled"
+    Add-Action "malformed-menu" "menu-visible-order-disabled"
     Stop-KioskProcess $malformed
 }
 catch {
